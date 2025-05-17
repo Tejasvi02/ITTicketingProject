@@ -64,7 +64,7 @@ public class TicketController {
 	}
 	
     // Get All Tickets (for Admin/Manager roles)
-    @GetMapping("/tickets")
+    @GetMapping("/getAllTickets")
     public List<Ticket> getAllTickets() {
         return ticketService.getAllTickets();
     }

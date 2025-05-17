@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synex.model.TicketForm;
@@ -26,8 +28,9 @@ public class TicketClient {
 	
 	private static final String testGetUrl = "http://localhost:8383/testGet/";
 	private static final String testPostUrl = "http://localhost:8383/testPost";
-	 private static final String createTicketUrl = "http://localhost:8383/tickets";
-	 private final String TICKET_SERVICE_URL = "http://localhost:8383";
+	private static final String createTicketUrl = "http://localhost:8383/tickets";
+	private static final String getAllTicketUrl = "http://localhost:8383/getAllTickets";
+
 
 	public String testGetClient(String data) {		
 		RestTemplate restTemplate = new RestTemplate();
@@ -87,6 +90,21 @@ public class TicketClient {
 	    HttpEntity<String> request = new HttpEntity<>(json, headers);
 	    return new RestTemplate().postForEntity(createTicketUrl, request, String.class);
 	}
+	
+//	public List<Map<String, Object>> getAllTickets() throws Exception {
+//	    String url = "http://localhost:8383/tickets";
+//	    ResponseEntity<String> response = new RestTemplate().getForEntity(url, String.class);
+//
+//	    ObjectMapper mapper = new ObjectMapper();
+//	    return mapper.readValue(response.getBody(), new TypeReference<List<Map<String, Object>>>(){});
+//	}
+	
+	
+    public List<Map<String, Object>> getAllTickets() {
+    	RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.getForObject(getAllTicketUrl, List.class);
+    }
+
 	//without file upload
 //    public ResponseEntity<String> createTicket(TicketForm form) throws Exception {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -137,37 +155,6 @@ public class TicketClient {
 //	}
 	
 
-//    public List<TicketModel> getAllTickets() {
-//    	System.out.println("Inside getAllTickets() method");
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<TicketModel[]> response = restTemplate.getForEntity(
-//                TICKET_SERVICE_URL + "/tickets", TicketModel[].class
-//        );
-//        System.out.println("Response from /tickets: " + Arrays.toString(response.getBody()));
-//        return Arrays.asList(response.getBody());
-//    }
-//	public List<TicketModel> getAllTickets() {
-//	    System.out.println("Inside getAllTickets() method");
-//
-//	    try {
-//	        RestTemplate restTemplate = new RestTemplate();
-//	        ResponseEntity<TicketModel[]> response = restTemplate.getForEntity(
-//	                TICKET_SERVICE_URL + "/tickets", TicketModel[].class
-//	        );
-//
-//	        TicketModel[] tickets = response.getBody();
-//
-//	        System.out.println("HTTP Status: " + response.getStatusCode());
-//	        System.out.println("Response body: " + Arrays.toString(tickets));
-//
-//	        return Arrays.asList(tickets);
-//
-//	    } catch (Exception e) {
-//	        System.out.println("Exception in getAllTickets: " + e.getMessage());
-//	        e.printStackTrace();
-//	        return new ArrayList<>();
-//	    }
-//	}
 //
 //    public List<TicketModel> getTicketsByUser(Long userId) {
 //        RestTemplate restTemplate = new RestTemplate();

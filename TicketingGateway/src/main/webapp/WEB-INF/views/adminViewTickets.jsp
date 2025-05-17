@@ -1,42 +1,80 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Admin - View Tickets</title>
+    <title>Admin View Tickets</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <h2>All Tickets</h2>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Created By</th>
-            <th>Assigned To</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        <c:forEach var="ticket" items="${tickets}">
+    <table id="ticketTable">
+        <thead>
             <tr>
-                <td>${ticket.id}</td>
-                <td>${ticket.title}</td>
-                <td>${ticket.createdBy}</td>
-                <td>${ticket.assignedTo}</td>
-                <td>${ticket.status}</td>
-                <td>
-                    <c:choose>
-                        <c:when test="${ticket.status == 'OPEN'}">
-                            <form method="post" action="/user/ticket/admin/resolve/${ticket.id}">
-                                <button type="submit">Resolve</button>
-                            </form>
-                        </c:when>
-                        <c:when test="${ticket.status == 'RESOLVED'}">
-                            <form method="post" action="/user/ticket/admin/reopen/${ticket.id}">
-                                <button type="submit">Reopen</button>
-                            </form>
-                        </c:when>
-                    </c:choose>
-                </td>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Category</th>
+                <th>Created On</th>
+                <th>Attachment</th>
+                <th>Last Action</th>
             </tr>
-        </c:forEach>
+        </thead>
+        <tbody>
+            <!-- Populated by jQuery AJAX -->
+        </tbody>
     </table>
+
+    <script>
+        $(document).ready(function () {
+            $.get("/admin/api/tickets", function (tickets) {
+                let rows = "";
+                if (tickets && tickets.length > 0) {
+                    for (let t of tickets) {
+                        let fileName = "None";
+                        if (t.fileAttachmentPaths && t.fileAttachmentPaths.length > 0) {
+                            fileName = t.fileAttachmentPaths[0].split("\\\\").pop();
+                        }
+
+                        let lastAction = "No history";
+                        if (t.history && t.history.length > 0) {
+                            lastAction = t.history[t.history.length - 1].action;
+                        }
+
+						rows += "<tr>" +
+						    "<td>" + t.id + "</td>" +
+						    "<td>" + t.title + "</td>" +
+						    "<td>" + t.status + "</td>" +
+						    "<td>" + t.priority + "</td>" +
+						    "<td>" + t.category + "</td>" +
+						    "<td>" + new Date(t.creationDate).toLocaleString() + "</td>" +
+						    "<td>" + fileName + "</td>" +
+						    "<td>" + lastAction + "</td>" +
+						"</tr>";
+                    }
+                } else {
+                    rows = `<tr><td colspan="8">No tickets found.</td></tr>`;
+                }
+                $("#ticketTable tbody").html(rows);
+            }).fail(function () {
+                $("#ticketTable tbody").html("<tr><td colspan='8'>Error loading tickets.</td></tr>");
+            });
+        });
+    </script>
 </body>
 </html>
+

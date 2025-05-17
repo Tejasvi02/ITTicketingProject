@@ -5,6 +5,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,9 +64,19 @@ public class TicketGatewayController {
     }
 
     
+    @GetMapping("/viewTickets")
+    @ResponseBody
+    public List<Map<String, Object>> viewAllTickets() throws Exception {
+        System.out.println("viewAllTickets() called");
+        List<Map<String, Object>> tickets = ticketClient.getAllTickets();
+        System.out.println("Tickets: " + tickets);
+        return ticketClient.getAllTickets();
+    }
     
-    
-    
+    @GetMapping("/ticketsPage")
+    public String showTicketsPage() {
+        return "viewTickets"; // resolves to viewTickets.jsp
+    }
     
     
 
@@ -83,9 +95,9 @@ public class TicketGatewayController {
 //            form.setAssignedTo(loggedInEmployee.getId().toString());
 //        }
 //
-////        for (MultipartFile file : files) {
-////            System.out.println("Received file: " + file.getOriginalFilename() + " | Size: " + file.getSize());
-////        }
+//        for (MultipartFile file : files) {
+//           System.out.println("Received file: " + file.getOriginalFilename() + " | Size: " + file.getSize());
+//       }
 //
 //        try {
 //            ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, Arrays.asList(files));
