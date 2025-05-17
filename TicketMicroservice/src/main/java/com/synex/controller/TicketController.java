@@ -49,19 +49,14 @@ public class TicketController {
 //	        return ticketService.getAllTickets();
 //	    }
 //	    
+    
+    
+    @GetMapping("/createdby/{createdBy}")
+    public List<Ticket> getTicketsByCreatedBy(@PathVariable String createdBy) {
+    	 System.out.println("Received request for createdBy: " + createdBy);
+        return ticketService.getTicketsByCreatedBy(createdBy);
+    }
 	    
-//Testing for gateway and microservice connection
-	@RequestMapping(value = "/testGet/{data}",method = RequestMethod.GET)
-	public String testGet(@PathVariable String data) {
-		return "Welcome I am Weather API"+data;
-	}
-	
-	@RequestMapping(value = "/testPostUser",method = RequestMethod.POST)
-	public JsonNode testPost(@RequestBody JsonNode node) {
-		((ObjectNode) node).put("age",40); //to add a property in response - cast node and add
-		System.out.println(node.get("data"));
-		return node;
-	}
 	
     // Get All Tickets (for Admin/Manager roles)
     @GetMapping("/getAllTickets")
@@ -92,5 +87,18 @@ public class TicketController {
 //        return ResponseEntity.ok(ticket);
 //    }
 //	
+    
+  //Testing for gateway and microservice connection
+  	@RequestMapping(value = "/testGet/{data}",method = RequestMethod.GET)
+  	public String testGet(@PathVariable String data) {
+  		return "Welcome I am Weather API"+data;
+  	}
+  	
+  	@RequestMapping(value = "/testPostUser",method = RequestMethod.POST)
+  	public JsonNode testPost(@RequestBody JsonNode node) {
+  		((ObjectNode) node).put("age",40); //to add a property in response - cast node and add
+  		System.out.println(node.get("data"));
+  		return node;
+  	}
 
 }

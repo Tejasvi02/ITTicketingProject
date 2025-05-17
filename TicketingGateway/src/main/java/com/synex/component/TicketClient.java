@@ -30,6 +30,7 @@ public class TicketClient {
 	private static final String testPostUrl = "http://localhost:8383/testPost";
 	private static final String createTicketUrl = "http://localhost:8383/tickets";
 	private static final String getAllTicketUrl = "http://localhost:8383/getAllTickets";
+	private static final String getUserTicketUrl = "http://localhost:8383/createdby/";
 
 
 	public String testGetClient(String data) {		
@@ -103,6 +104,14 @@ public class TicketClient {
     public List<Map<String, Object>> getAllTickets() {
     	RestTemplate restTemplate = new RestTemplate();
         return restTemplate.getForObject(getAllTicketUrl, List.class);
+    }
+    
+    public List<Map<String, Object>> getTicketsByCreatedBy(String createdBy) {
+    	System.out.println("Calling microservice for createdBy: " + createdBy);
+    	RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<List> response = restTemplate.getForEntity(getUserTicketUrl+createdBy, List.class);
+        System.out.println("Response from microservice: " + response.getBody());
+        return response.getBody();
     }
 
 	//without file upload

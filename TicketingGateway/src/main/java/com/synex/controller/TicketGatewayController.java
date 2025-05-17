@@ -58,16 +58,16 @@ public class TicketGatewayController {
 
             
             // Use service to fetch employee name by email
-            Employee employee = employeeRoleService.findByEmail(currentUserEmail);
-            if (employee == null) {
-                throw new RuntimeException("Employee not found for email: " + currentUserEmail);
-            }
+//            Employee employee = employeeRoleService.findByEmail(currentUserEmail);
+//            if (employee == null) {
+//                throw new RuntimeException("Employee not found for email: " + currentUserEmail);
+//            }
 
             //Set createdBy as employee name
-            form.setCreatedBy(employee.getName());
+            //form.setCreatedBy(employee.getName());
             
             // Set createdBy field in TicketForm- email
-            //form.setCreatedBy(currentUserEmail);
+            form.setCreatedBy(currentUserEmail);
 
             // Proceed with ticket creation
             List<MultipartFile> fileList = Arrays.asList(files);

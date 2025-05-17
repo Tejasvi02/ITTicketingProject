@@ -66,6 +66,13 @@ public class TicketService {
         return ticketRepo.findAll();
     }
     
+    public List<Ticket> getTicketsByCreatedBy(String createdBy) {
+        System.out.println("Fetching from DB for createdBy: " + createdBy); // <-- LOG HERE
+        List<Ticket> tickets = ticketRepo.findByCreatedBy(createdBy);
+        System.out.println("Tickets fetched: " + tickets); // <-- LOG HERE
+        return tickets;
+    }
+    
 //    public List<Ticket> getTicketsByCreator(String createdBy) {
 //        return ticketRepo.findByCreatedBy(createdBy);
 //    }
