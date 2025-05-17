@@ -26,7 +26,6 @@ import com.synex.component.TicketClient;
 import com.synex.domain.Employee;
 import com.synex.domain.Ticket;
 import com.synex.model.TicketForm;
-import com.synex.model.TicketModel;
 import com.synex.service.EmployeeRoleService;
 
 @Controller
@@ -45,14 +44,25 @@ public class TicketGatewayController {
         model.addAttribute("ticketForm", new TicketForm());
         return "ticketForm";
     }
-
+    
+    
+    //with createdby
     @PostMapping("/submitTicket")
     public String submitTicket(@ModelAttribute TicketForm form,
                                @RequestParam("files") MultipartFile[] files,
                                Model model) {
         try {
+            // Get logged-in user's email from Security Context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserEmail = authentication.getName(); // assuming email is the username
+
+            // Set createdBy field in TicketForm
+            form.setCreatedBy(currentUserEmail);
+
+            // Proceed with ticket creation
             List<MultipartFile> fileList = Arrays.asList(files);
             ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
+
             ObjectMapper mapper = new ObjectMapper();
             Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
             model.addAttribute("response", createdTicket);
@@ -62,6 +72,24 @@ public class TicketGatewayController {
             return "ticketForm";
         }
     }
+
+// Without createdby
+//    @PostMapping("/submitTicket")
+//    public String submitTicket(@ModelAttribute TicketForm form,
+//                               @RequestParam("files") MultipartFile[] files,
+//                               Model model) {
+//        try {
+//            List<MultipartFile> fileList = Arrays.asList(files);
+//            ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
+//            ObjectMapper mapper = new ObjectMapper();
+//            Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
+//            model.addAttribute("response", createdTicket);
+//            return "ticketSuccess";
+//        } catch (Exception e) {
+//            model.addAttribute("error", "Error submitting ticket: " + e.getMessage());
+//            return "ticketForm";
+//        }
+//    }
 
     
     @GetMapping("/viewTickets")
@@ -80,37 +108,6 @@ public class TicketGatewayController {
     
     
 
-//    @PostMapping("/submitTicket")
-//    public String submitTicket(@ModelAttribute TicketForm form,
-//                               @RequestParam("files") MultipartFile[] files,
-//                               Model model) {
-//       // System.out.println("Received files count: " + files.length); // Debug
-//    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName(); // email is used as username
-//        Employee loggedInEmployee = employeeRoleService.findByEmail(email);
-//        
-//        form.setCreatedBy(loggedInEmployee.getId().toString());
-//        
-//        if (loggedInEmployee.getRoles().stream().anyMatch(r -> r.getRoleName().equals("ADMIN"))) {
-//            form.setAssignedTo(loggedInEmployee.getId().toString());
-//        }
-//
-//        for (MultipartFile file : files) {
-//           System.out.println("Received file: " + file.getOriginalFilename() + " | Size: " + file.getSize());
-//       }
-//
-//        try {
-//            ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, Arrays.asList(files));
-//            ObjectMapper mapper = new ObjectMapper();
-//            Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
-//            model.addAttribute("response", createdTicket);
-//            return "ticketSuccess";
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            model.addAttribute("error", "Error submitting ticket: " + e.getMessage());
-//            return "ticketForm";
-//        }
-//    }
     
 //    @GetMapping("/admin/tickets")
 //    public String viewAllTicketsForAdmin(Model model) {

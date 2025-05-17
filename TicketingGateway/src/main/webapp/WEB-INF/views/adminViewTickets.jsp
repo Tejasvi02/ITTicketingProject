@@ -29,6 +29,7 @@
                 <th>Status</th>
                 <th>Priority</th>
                 <th>Category</th>
+				<th>Created By</th>
                 <th>Created On</th>
                 <th>Attachment</th>
                 <th>Last Action</th>
@@ -61,6 +62,7 @@
 						    "<td>" + t.status + "</td>" +
 						    "<td>" + t.priority + "</td>" +
 						    "<td>" + t.category + "</td>" +
+							"<td>" + t.createdBy + "</td>" +
 						    "<td>" + new Date(t.creationDate).toLocaleString() + "</td>" +
 						    "<td>" + fileName + "</td>" +
 						    "<td>" + lastAction + "</td>" +

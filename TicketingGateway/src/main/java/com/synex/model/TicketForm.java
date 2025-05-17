@@ -9,7 +9,7 @@ public class TicketForm {
     private String category;
     private List<String> fileAttachmentPaths;
 
-    //private String createdBy;  // <-- Add this
+    private String createdBy;  
     //private String assignedTo; 
 
 
@@ -33,12 +33,12 @@ public class TicketForm {
 	public void setFileAttachmentPaths(List<String> fileAttachmentPaths) {
 		this.fileAttachmentPaths = fileAttachmentPaths;
 	}
-//	public String getCreatedBy() {
-//		return createdBy;
-//	}
-//	public void setCreatedBy(String createdBy) {
-//		this.createdBy = createdBy;
-//	}
+	public String getCreatedBy() {
+		return createdBy;
+	}
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 //	public String getAssignedTo() {
 //		return assignedTo;
 //	}

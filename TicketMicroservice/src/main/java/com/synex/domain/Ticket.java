@@ -29,7 +29,7 @@ public class Ticket {
     private String title;
     private String description;
 
-//    private String createdBy;   // <-- Store employeeId from Gateway
+    private String createdBy; 
 //    private String assignedTo;
 
 
@@ -121,13 +121,13 @@ public class Ticket {
 		this.history = history;
 	}
 
-//	public String getCreatedBy() {
-//		return createdBy;
-//	}
-//
-//	public void setCreatedBy(String createdBy) {
-//		this.createdBy = createdBy;
-//	}
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 //
 //	public String getAssignedTo() {
 //		return assignedTo;
