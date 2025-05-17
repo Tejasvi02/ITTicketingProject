@@ -56,8 +56,18 @@ public class TicketGatewayController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUserEmail = authentication.getName(); // assuming email is the username
 
-            // Set createdBy field in TicketForm
-            form.setCreatedBy(currentUserEmail);
+            
+            // Use service to fetch employee name by email
+            Employee employee = employeeRoleService.findByEmail(currentUserEmail);
+            if (employee == null) {
+                throw new RuntimeException("Employee not found for email: " + currentUserEmail);
+            }
+
+            //Set createdBy as employee name
+            form.setCreatedBy(employee.getName());
+            
+            // Set createdBy field in TicketForm- email
+            //form.setCreatedBy(currentUserEmail);
 
             // Proceed with ticket creation
             List<MultipartFile> fileList = Arrays.asList(files);
