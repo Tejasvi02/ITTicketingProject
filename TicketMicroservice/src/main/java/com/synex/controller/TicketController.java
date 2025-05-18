@@ -43,17 +43,10 @@ public class TicketController {
 //        return new ResponseEntity<>(createdTicket, HttpStatus.CREATED);
 //    }
 
-//
-//	    @GetMapping("/getAllTickets")
-//	    public List<Ticket> getAllTickets() {
-//	        return ticketService.getAllTickets();
-//	    }
-//	    
-    
     
     @GetMapping("/createdby/{createdBy}")
     public List<Ticket> getTicketsByCreatedBy(@PathVariable String createdBy) {
-    	 System.out.println("Received request for createdBy: " + createdBy);
+    	// System.out.println("Received request for createdBy: " + createdBy);
         return ticketService.getTicketsByCreatedBy(createdBy);
     }
 	    
@@ -64,12 +57,7 @@ public class TicketController {
         return ticketService.getAllTickets();
     }
 
-//    // Get Tickets by CreatedBy (String userId like "emp123")
-//    @GetMapping("/tickets/user/{userId}")
-//    public List<Ticket> getTicketsByUserId(@PathVariable String userId) {
-//        return ticketService.getTicketsByCreator(userId);
-//    }
-//
+
 //    // Resolve a Ticket (by Admin)
 //    @PutMapping("/resolve/{ticketId}")
 //    public ResponseEntity<Ticket> resolveTicket(
@@ -80,13 +68,7 @@ public class TicketController {
 //        return ResponseEntity.ok(resolvedTicket);
 //    }
 //
-//    // Reopen a Ticket (by Admin)
-//    @PutMapping("/reopen/{ticketId}")
-//    public ResponseEntity<Ticket> reopenTicket(@PathVariable Long ticketId) {
-//        Ticket ticket = ticketService.reopenTicket(ticketId);
-//        return ResponseEntity.ok(ticket);
-//    }
-//	
+	
     
   //Testing for gateway and microservice connection
   	@RequestMapping(value = "/testGet/{data}",method = RequestMethod.GET)

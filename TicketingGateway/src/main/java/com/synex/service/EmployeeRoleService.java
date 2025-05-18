@@ -62,4 +62,15 @@ public class EmployeeRoleService {
 	    public Employee saveEmployee(Employee employee) {
 	        return employeeRepo.save(employee);
 	    }
+	    
+	    public Employee saveEmployeeWithNewManager(Long employeeId, Long managerId) {
+	        Employee employee = employeeRepo.findById(employeeId).orElseThrow();
+	        employee.setManagerId(managerId);
+	        return employeeRepo.save(employee);
+	    }
+	    public void setManagerForUser(Long employeeId, Long managerId) {
+	        Employee employee = employeeRepo.findById(employeeId).orElseThrow();
+	        employee.setManagerId(managerId);
+	        employeeRepo.save(employee);
+	    }
 }

@@ -16,7 +16,7 @@
 
 	<security:authorize access="hasRole('ADMIN')">
 	    <p>Hello Admin</p>
-	    <a href="/admin/users" class="btn btn-warning">Go to Admin Page</a>
+	    <a href="/admin/users" class="btn btn-warning">Manage users</a>
 	    <a href="/admin/tickets" class="btn btn-primary">View Tickets</a>
 	</security:authorize>
 

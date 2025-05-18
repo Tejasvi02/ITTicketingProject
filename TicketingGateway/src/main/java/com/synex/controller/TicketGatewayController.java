@@ -105,9 +105,9 @@ public class TicketGatewayController {
     @GetMapping("/viewTickets")
     @ResponseBody
     public List<Map<String, Object>> viewAllTickets() throws Exception {
-        System.out.println("viewAllTickets() called");
+        //System.out.println("viewAllTickets() called");
         List<Map<String, Object>> tickets = ticketClient.getAllTickets();
-        System.out.println("Tickets: " + tickets);
+        //System.out.println("Tickets: " + tickets);
         return ticketClient.getAllTickets();
     }
     

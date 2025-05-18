@@ -33,7 +33,7 @@ public class AccessController {
     // Show registration page
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-    	System.out.println("Register page called");
+    	//System.out.println("Register page called");
         model.addAttribute("employee", new Employee());
         return "register"; // register.jsp
     }
@@ -88,16 +88,49 @@ public class AccessController {
         return "adminPage"; // adminPage.jsp
     }
 
-    // Assign MANAGER role to a user
+    // Assign MANAGER role to a user without user assign
+//    @PostMapping("/admin/assign-role")
+//    public String assignManager(@RequestParam Long userId) {
+//        employeeRoleService.assignManagerRole(userId);
+//        return "redirect:/admin/users";
+//    }
+    
+    //Manager with user assignment try -1
+//    @PostMapping("/admin/assign-role")
+//    public String assignManager(@RequestParam Long userId,
+//                                @RequestParam(required = false, name = "assignedUserIds") List<Long> assignedUserIds) {
+//        employeeRoleService.assignManagerRole(userId);
+//
+//        if (assignedUserIds != null && !assignedUserIds.isEmpty()) {
+//            for (Long assignedUserId : assignedUserIds) {
+//                employeeRoleService.saveEmployeeWithNewManager(assignedUserId, userId);
+//            }
+//        }
+//        return "redirect:/admin/users";
+//    }
+    
     @PostMapping("/admin/assign-role")
-    public String assignManager(@RequestParam Long userId) {
+    public String assignManager(@RequestParam Long userId,
+                                @RequestParam(required = false, name = "assignedUserIds") List<Long> assignedUserIds,
+                                Model model) {
+        if (assignedUserIds == null || assignedUserIds.isEmpty()) {
+            model.addAttribute("error", "You must assign at least one employee when making a manager.");
+            return "redirect:/admin/users"; // optionally render the JSP with error
+        }
+
         employeeRoleService.assignManagerRole(userId);
+
+        for (Long assignedUserId : assignedUserIds) {
+            employeeRoleService.setManagerForUser(assignedUserId, userId);
+        }
+
         return "redirect:/admin/users";
     }
+
     
     @PostMapping("/create-admin")
     public ResponseEntity<String> createAdmin(@RequestBody Employee employee) {
-    	System.out.println("Checking existing employee: " + employeeRoleService.findByEmail(employee.getEmail()));
+    	//System.out.println("Checking existing employee: " + employeeRoleService.findByEmail(employee.getEmail()));
         if (employeeRoleService.findByEmail(employee.getEmail()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Admin already exists");
         }

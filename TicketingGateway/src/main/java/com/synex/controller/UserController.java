@@ -26,7 +26,7 @@ public class UserController {
     @ResponseBody
     public List<Map<String, Object>> getUserTickets(Principal principal) {
         String username = principal.getName();
-        System.out.println("Fetching tickets for: " + username); 
+        //System.out.println("Fetching tickets for: " + username); 
         return ticketClient.getTicketsByCreatedBy(username);
     }
 }

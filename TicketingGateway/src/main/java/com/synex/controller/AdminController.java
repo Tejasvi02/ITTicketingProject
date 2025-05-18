@@ -31,7 +31,7 @@ public class AdminController {
     @ResponseBody
     public List<Map<String, Object>> getAllTickets() {
         List<Map<String, Object>> tickets = ticketClient.getAllTickets();
-        System.out.println("Tickets returned to frontend: " + tickets); // DEBUG LOG
+        //System.out.println("Tickets returned to frontend: " + tickets); // DEBUG LOG
         return tickets;
     }
 }
