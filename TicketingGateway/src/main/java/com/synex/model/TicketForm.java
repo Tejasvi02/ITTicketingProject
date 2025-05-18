@@ -10,7 +10,7 @@ public class TicketForm {
     private List<String> fileAttachmentPaths;
 
     private String createdBy;  
-    //private String assignedTo; 
+    private String assignedTo; 
 
 
     // Getters and Setters
@@ -39,12 +39,12 @@ public class TicketForm {
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-//	public String getAssignedTo() {
-//		return assignedTo;
-//	}
-//	public void setAssignedTo(String assignedTo) {
-//		this.assignedTo = assignedTo;
-//	}
+	public String getAssignedTo() {
+		return assignedTo;
+	}
+	public void setAssignedTo(String assignedTo) {
+		this.assignedTo = assignedTo;
+	}
 	
     
 }

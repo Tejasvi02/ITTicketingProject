@@ -68,6 +68,8 @@ public class TicketGatewayController {
             
             // Set createdBy field in TicketForm- email
             form.setCreatedBy(currentUserEmail);
+            
+            form.setAssignedTo(currentUserEmail);
 
             // Proceed with ticket creation
             List<MultipartFile> fileList = Arrays.asList(files);

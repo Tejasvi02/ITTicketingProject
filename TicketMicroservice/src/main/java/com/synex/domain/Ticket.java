@@ -30,7 +30,7 @@ public class Ticket {
     private String description;
 
     private String createdBy; 
-//    private String assignedTo;
+    private String assignedTo;
 
 
     private String priority; // LOW, MEDIUM, HIGH
@@ -128,14 +128,14 @@ public class Ticket {
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-//
-//	public String getAssignedTo() {
-//		return assignedTo;
-//	}
-//
-//	public void setAssignedTo(String assignedTo) {
-//		this.assignedTo = assignedTo;
-//	}
+
+	public String getAssignedTo() {
+		return assignedTo;
+	}
+
+	public void setAssignedTo(String assignedTo) {
+		this.assignedTo = assignedTo;
+	}
 
     
 }
