@@ -41,9 +41,12 @@ public class EmployeeRoleService {
 	            managerRole.setRoleName("MANAGER");
 	            roleRepo.save(managerRole);
 	        }
-	        employee.getRoles().add(managerRole);
+	        if (!employee.getRoles().contains(managerRole)) {
+	            employee.getRoles().add(managerRole);
+	        }
 	        employeeRepo.save(employee);
 	    }
+
 
 	    public Employee findByEmail(String email) {
 	        return employeeRepo.findByEmail(email);
@@ -73,4 +76,17 @@ public class EmployeeRoleService {
 	        employee.setManagerId(managerId);
 	        employeeRepo.save(employee);
 	    }
+	    
+	    public Employee getEmployeeById(Long id) {
+	        return employeeRepo.findById(id).orElseThrow();
+	    }
+	    
+	    public Employee findAdminForNewManager() {
+	        List<Employee> all = employeeRepo.findAll();
+	        return all.stream()
+	            .filter(emp -> emp.getRoles().stream().anyMatch(r -> r.getRoleName().equals("ADMIN")))
+	            .findFirst()
+	            .orElse(null);
+	    }
+
 }

@@ -98,35 +98,48 @@ public class AccessController {
     //Manager with user assignment try -1
 //    @PostMapping("/admin/assign-role")
 //    public String assignManager(@RequestParam Long userId,
-//                                @RequestParam(required = false, name = "assignedUserIds") List<Long> assignedUserIds) {
+//                                @RequestParam(required = false, name = "assignedUserIds") List<Long> assignedUserIds,
+//                                Model model) {
+//        if (assignedUserIds == null || assignedUserIds.isEmpty()) {
+//            model.addAttribute("error", "You must assign at least one employee when making a manager.");
+//            return "redirect:/admin/users"; // optionally render the JSP with error
+//        }
+//
 //        employeeRoleService.assignManagerRole(userId);
 //
-//        if (assignedUserIds != null && !assignedUserIds.isEmpty()) {
-//            for (Long assignedUserId : assignedUserIds) {
-//                employeeRoleService.saveEmployeeWithNewManager(assignedUserId, userId);
-//            }
+//        for (Long assignedUserId : assignedUserIds) {
+//            employeeRoleService.setManagerForUser(assignedUserId, userId);
 //        }
+//
 //        return "redirect:/admin/users";
 //    }
-    
+
     @PostMapping("/admin/assign-role")
     public String assignManager(@RequestParam Long userId,
                                 @RequestParam(required = false, name = "assignedUserIds") List<Long> assignedUserIds,
                                 Model model) {
+
         if (assignedUserIds == null || assignedUserIds.isEmpty()) {
             model.addAttribute("error", "You must assign at least one employee when making a manager.");
-            return "redirect:/admin/users"; // optionally render the JSP with error
+            return "redirect:/admin/users";
         }
 
+        Employee manager = employeeRoleService.getEmployeeById(userId);
+
+        // Assign MANAGER role to selected user and set ADMIN as their manager
+        Employee admin = employeeRoleService.findAdminForNewManager();
+        if (admin != null) {
+            manager.setManagerId(admin.getId());
+        }
         employeeRoleService.assignManagerRole(userId);
 
+        // Assign selected users to this manager
         for (Long assignedUserId : assignedUserIds) {
             employeeRoleService.setManagerForUser(assignedUserId, userId);
         }
 
         return "redirect:/admin/users";
     }
-
     
     @PostMapping("/create-admin")
     public ResponseEntity<String> createAdmin(@RequestBody Employee employee) {
