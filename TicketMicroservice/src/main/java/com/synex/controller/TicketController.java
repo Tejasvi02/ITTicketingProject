@@ -130,6 +130,19 @@ public class TicketController {
         ticketService.approveTicket(id, adminEmail);
         return ResponseEntity.ok(Map.of("message","Ticket approved."));
     }
+    
+    @PostMapping("/ticket/{id}/reopen")
+    public ResponseEntity<?> reopenTicket(@PathVariable Long id) {
+        ticketService.reopenTicket(id);
+        return ResponseEntity.ok(Map.of("message", "Ticket reopened."));
+    }
+
+    @PostMapping("/ticket/{id}/close")
+    public ResponseEntity<?> closeTicket(@PathVariable Long id) {
+        ticketService.closeTicket(id);
+        return ResponseEntity.ok(Map.of("message", "Ticket closed."));
+    }
+
 
 
 }

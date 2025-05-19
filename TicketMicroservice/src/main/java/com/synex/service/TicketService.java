@@ -27,24 +27,6 @@ public class TicketService {
     @Autowired
     TicketHistoryRepository historyRepo;
     
- 
-    
-//Without file upload
-//    public Ticket createTicket(Ticket ticket) {
-//        ticket.setCreationDate(new Date());
-//        ticket.setStatus("OPEN");
-//
-//        Ticket saved = ticketRepo.save(ticket);
-//
-//        TicketHistory history = new TicketHistory();
-//        history.setTicket(saved);
-//        history.setAction("CREATED");
-//        history.setActionDate(new Date());
-//        history.setComments("Ticket created");
-//
-//        historyRepo.save(history);
-//        return saved;
-//    }
 
     public Ticket createTicket(Ticket ticket) {
         ticket.setCreationDate(new Date());
@@ -126,11 +108,26 @@ public class TicketService {
         ticket.setAssignedTo(ticket.getCreatedBy()); // Reassign to creator
         return ticketRepo.save(ticket);
     }
+    
+    public Ticket reopenTicket(Long ticketId) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        if (!"RESOLVED".equals(ticket.getStatus())) {
+            throw new IllegalStateException("Only resolved tickets can be reopened.");
+        }
+        ticket.setStatus("REOPENED");
+        return ticketRepo.save(ticket);
+    }
 
-//    
-//    public Ticket reopenTicket(Long ticketId) {
-//        Ticket ticket = ticketRepo.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
-//        ticket.setStatus("OPEN");
-//        return ticketRepo.save(ticket);
-//    }
+    public Ticket closeTicket(Long ticketId) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        if (!"RESOLVED".equals(ticket.getStatus())) {
+            throw new IllegalStateException("Only resolved tickets can be closed.");
+        }
+        ticket.setStatus("CLOSED");
+        return ticketRepo.save(ticket);
+    }
+
+
 }

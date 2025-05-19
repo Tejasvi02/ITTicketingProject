@@ -101,13 +101,6 @@ public class TicketClient {
 	    return new RestTemplate().postForEntity(createTicketUrl, request, String.class);
 	}
 	
-//	public List<Map<String, Object>> getAllTickets() throws Exception {
-//	    String url = "http://localhost:8383/tickets";
-//	    ResponseEntity<String> response = new RestTemplate().getForEntity(url, String.class);
-//
-//	    ObjectMapper mapper = new ObjectMapper();
-//	    return mapper.readValue(response.getBody(), new TypeReference<List<Map<String, Object>>>(){});
-//	}
 	
 	
     public List<Map<String, Object>> getAllTickets() {
@@ -123,17 +116,6 @@ public class TicketClient {
         return response.getBody();
     }
     
-//    public void sendForApproval(Long ticketId, String username) {
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        // Get manager email as plain string
-//        ResponseEntity<String> response = restTemplate.getForEntity(approvalUrl + "?username=" + username, String.class);
-//        String managerEmail = response.getBody();
-//
-//        // Send to ticket microservice
-//        String url = requestApprovalUrl + ticketId + "/request-approval?managerEmail=" + managerEmail;
-//        restTemplate.postForEntity(url, null, Void.class);
-//    }
     
     public void sendForApproval(Long ticketId, String username) {
         // 1) Direct lookup of manager email (no HTTP)
@@ -152,15 +134,6 @@ public class TicketClient {
         return restTemplate.getForObject(ticketsToApproveUrl + managerEmail, List.class);
     }
 
-    //approve without admin assignment
-//    public void approveTicket(Long ticketId) {
-//    	RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.postForEntity(
-//            approveTicketUrl + ticketId + "/approve",
-//            null,
-//            Void.class
-//        );
-//    }
     
     public void approveTicket(Long ticketId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -188,6 +161,17 @@ public class TicketClient {
         restTemplate.postForEntity(url, null, Void.class);
     }
     
+
+    public void reopenTicket(Long ticketId) {
+    String url = baseTicketUrl + ticketId + "/reopen";
+    new RestTemplate().postForEntity(url, null, Void.class);
+    }
+
+    public void closeTicket(Long ticketId) {
+    String url = baseTicketUrl + ticketId + "/close";
+    new RestTemplate().postForEntity(url, null, Void.class);
+    }	
+    
 	//without file upload
 //    public ResponseEntity<String> createTicket(TicketForm form) throws Exception {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -203,15 +187,4 @@ public class TicketClient {
 //    }
 
 
-//
-//    public void resolveTicket(Long ticketId, String adminId) {
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.put(TICKET_SERVICE_URL + "/tickets/resolve/" + ticketId + "?adminId=" + adminId, null);
-//    }
-//
-//    public void reopenTicket(Long ticketId) {
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.put(TICKET_SERVICE_URL + "/tickets/reopen/" + ticketId, null);
-//    }
-//	
 }

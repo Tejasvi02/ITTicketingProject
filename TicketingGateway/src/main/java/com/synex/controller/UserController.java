@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,20 @@ public class UserController {
             Principal principal) {
         ticketClient.sendForApproval(id, principal.getName());
         return Map.of("message", "Sent for approval.");
+    }
+    
+    @PostMapping("/user/api/ticket/{id}/reopen")
+    @ResponseBody
+    public ResponseEntity<?> reopenTicket(@PathVariable Long id) {
+        ticketClient.reopenTicket(id);
+        return ResponseEntity.ok(Map.of("message", "Ticket reopened."));
+    }
+
+    @PostMapping("/user/api/ticket/{id}/close")
+    @ResponseBody
+    public ResponseEntity<?> closeTicket(@PathVariable Long id) {
+        ticketClient.closeTicket(id);
+        return ResponseEntity.ok(Map.of("message", "Ticket closed."));
     }
 
 

@@ -59,11 +59,16 @@
 						    "<td>" + t.status + "</td>" +
 						    "<td>" + createdDate + "</td>";
 
-						if (t.status === "OPEN") {
-						    rows += "<td><button onclick='sendForApproval(" + t.id + ")'>Send for Approval</button></td>";
-						} else {
-						    rows += "<td>-</td>";
-						}
+							if (t.status === "OPEN" || t.status === "REOPENED") {
+							    rows += "<td><button onclick='sendForApproval(" + t.id + ")'>Send for Approval</button></td>";
+							} else if (t.status === "RESOLVED") {
+							    rows += "<td>" +
+							        "<a href='#' onclick='reopenTicket(" + t.id + ")'>Reopen</a> | " +
+							        "<a href='#' onclick='closeTicket(" + t.id + ")'>Close</a>" +
+							        "</td>";
+							} else {
+							    rows += "<td>-</td>";
+							}
 
 						rows += "</tr>";
                     }
@@ -82,6 +87,23 @@
 		        location.reload();
 		    }).fail(function () {
 		        alert("Failed to send for approval.");
+		    });
+		}
+		function reopenTicket(ticketId) {
+		    $.post("/user/api/ticket/" + ticketId + "/reopen", function (response) {
+		        alert(response.message);
+		        location.reload();
+		    }).fail(function () {
+		        alert("Failed to reopen ticket.");
+		    });
+		}
+
+		function closeTicket(ticketId) {
+		    $.post("/user/api/ticket/" + ticketId + "/close", function (response) {
+		        alert(response.message);
+		        location.reload();
+		    }).fail(function () {
+		        alert("Failed to close ticket.");
 		    });
 		}
     </script>
