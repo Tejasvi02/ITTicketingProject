@@ -19,6 +19,12 @@
         th {
             background-color: #f0f0f0;
         }
+        a.action-link {
+            margin-right: 10px;
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -56,7 +62,10 @@
                             "<td>" + t.title + "</td>" +
                             "<td>" + t.status + "</td>" +
                             "<td>" + createdDate + "</td>" +
-                            "<td><button onclick='approveTicket(" + t.id + ")'>Approve</button></td>" +
+                            "<td>" +
+                                "<a href='#' class='action-link' onclick='approveTicket(" + t.id + ")'>Approve</a>" +
+                                "<a href='#' class='action-link' onclick='rejectTicket(" + t.id + ")'>Reject</a>" +
+                            "</td>" +
                             "</tr>";
                     }
                 } else {
@@ -74,6 +83,15 @@
                 location.reload();
             }).fail(function () {
                 alert("Failed to approve ticket.");
+            });
+        }
+
+        function rejectTicket(ticketId) {
+            $.post("/manager/api/ticket/" + ticketId + "/reject", function (response) {
+                alert(response.message);
+                location.reload();
+            }).fail(function () {
+                alert("Failed to reject ticket.");
             });
         }
     </script>

@@ -32,7 +32,6 @@
 				<th>Created By</th>
                 <th>Created On</th>
                 <th>Attachment</th>
-                <th>Last Action</th>
             </tr>
         </thead>
         <tbody>
@@ -51,11 +50,6 @@
                             fileName = t.fileAttachmentPaths[0].split("\\\\").pop();
                         }
 
-                        let lastAction = "No history";
-                        if (t.history && t.history.length > 0) {
-                            lastAction = t.history[t.history.length - 1].action;
-                        }
-
 						rows += "<tr>" +
 						    "<td>" + t.id + "</td>" +
 						    "<td>" + t.title + "</td>" +
@@ -65,7 +59,6 @@
 							"<td>" + t.createdBy + "</td>" +
 						    "<td>" + new Date(t.creationDate).toLocaleString() + "</td>" +
 						    "<td>" + fileName + "</td>" +
-						    "<td>" + lastAction + "</td>" +
 						"</tr>";
                     }
                 } else {

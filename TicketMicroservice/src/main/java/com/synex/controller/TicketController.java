@@ -97,17 +97,11 @@ public class TicketController {
         return ticketService.getAllTickets();
     }
 
-
-//    // Resolve a Ticket (by Admin)
-//    @PutMapping("/resolve/{ticketId}")
-//    public ResponseEntity<Ticket> resolveTicket(
-//            @PathVariable Long ticketId,
-//            @RequestParam String adminId) {
-//
-//        Ticket resolvedTicket = ticketService.resolveTicket(ticketId, adminId);
-//        return ResponseEntity.ok(resolvedTicket);
-//    }
-//
+    @PostMapping("/ticket/{id}/resolve")
+    public ResponseEntity<?> resolveTicket(@PathVariable Long id) {
+        ticketService.resolveTicket(id);
+        return ResponseEntity.ok(Map.of("message", "Ticket resolved successfully."));
+    }
 	
     
   //Testing for gateway and microservice connection

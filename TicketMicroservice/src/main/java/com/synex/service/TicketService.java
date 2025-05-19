@@ -114,15 +114,19 @@ public class TicketService {
         return ticketRepo.save(ticket);
     }
     
-//    public List<Ticket> getTicketsByCreator(String createdBy) {
-//        return ticketRepo.findByCreatedBy(createdBy);
-//    }
-//    public Ticket resolveTicket(Long ticketId, String adminId) {
-//        Ticket ticket = ticketRepo.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
-//        ticket.setStatus("RESOLVED");
-//        ticket.setAssignedTo(adminId); // tracking which admin resolved
-//        return ticketRepo.save(ticket);
-//    }
+    public Ticket resolveTicket(Long ticketId) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if (!"APPROVED".equals(ticket.getStatus())) {
+            throw new IllegalStateException("Only approved tickets can be resolved.");
+        }
+
+        ticket.setStatus("RESOLVED");
+        ticket.setAssignedTo(ticket.getCreatedBy()); // Reassign to creator
+        return ticketRepo.save(ticket);
+    }
+
 //    
 //    public Ticket reopenTicket(Long ticketId) {
 //        Ticket ticket = ticketRepo.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));

@@ -18,6 +18,7 @@
 	    <p>Hello Admin</p>
 	    <a href="/admin/users" class="btn btn-warning">Manage users</a>
 	    <a href="/admin/tickets" class="btn btn-primary">View Tickets</a>
+		<a href="/admin/assigned-tickets" class="btn btn-success">View Assigned Tickets</a>
 	</security:authorize>
 
 	<security:authorize access="hasRole('MANAGER')">

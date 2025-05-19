@@ -24,7 +24,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synex.model.TicketForm;
-import com.synex.model.TicketModel;
 import com.synex.service.EmployeeRoleService;
 
 @Component
@@ -35,11 +34,11 @@ public class TicketClient {
 	private static final String createTicketUrl = "http://localhost:8383/tickets";
 	private static final String getAllTicketUrl = "http://localhost:8383/getAllTickets";
 	private static final String getUserTicketUrl = "http://localhost:8383/createdby/";
-    private static final String approvalUrl = "http://localhost:8282/manager/api/manager-email";
+    //private static final String approvalUrl = "http://localhost:8282/manager/api/manager-email";
     private static final String requestApprovalUrl = "http://localhost:8383/ticket/"; // append {id}/request-approval
     private static final String ticketsToApproveUrl = "http://localhost:8383/api/manager/tickets?managerEmail=";
-    private static final String approveTicketUrl = "http://localhost:8383/ticket/"; // append {id}/approve
-    
+    private static final String baseTicketUrl = "http://localhost:8383/ticket/"; 
+
     @Autowired
     private EmployeeRoleService employeeRoleService;
 
@@ -163,20 +162,6 @@ public class TicketClient {
 //        );
 //    }
     
-//    public void approveTicket(Long ticketId) {
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        // 1) Hard‑coded single admin email (until you build an admin lookup page)
-//        String adminEmail = "admin@gmail.com";
-//
-//        // 2) Call the ticket microservice to approve & assign to admin
-//        String url = approveTicketUrl 
-//                   + ticketId 
-//                   + "/approve?adminEmail=" 
-//                   + URLEncoder.encode(adminEmail, StandardCharsets.UTF_8);
-//        restTemplate.postForEntity(url, null, Void.class);
-//    }
-    
     public void approveTicket(Long ticketId) {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -184,7 +169,7 @@ public class TicketClient {
         String adminEmail = "admin@gmail.com";
 
         // Send raw email without encoding
-        String url = approveTicketUrl 
+        String url = baseTicketUrl 
                    + ticketId 
                    + "/approve?adminEmail=" 
                    + adminEmail;
@@ -193,9 +178,16 @@ public class TicketClient {
     }
     public void rejectTicket(Long ticketId, String managerEmail) {
     	RestTemplate restTemplate = new RestTemplate();
-        String url = approveTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail;
+        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail;
         restTemplate.postForEntity(url, null, Void.class);
     }
+    
+    public void resolveTicket(Long ticketId) {
+        String url = baseTicketUrl + ticketId + "/resolve";
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.postForEntity(url, null, Void.class);
+    }
+    
 	//without file upload
 //    public ResponseEntity<String> createTicket(TicketForm form) throws Exception {
 //        ObjectMapper mapper = new ObjectMapper();
