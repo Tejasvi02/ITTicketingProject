@@ -73,6 +73,31 @@ public class TicketService {
         return tickets;
     }
     
+    public void sendForApproval(Long ticketId, String managerEmail) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        ticket.setStatus("PENDING_APPROVAL");
+        ticket.setAssignedTo(managerEmail);
+        ticketRepo.save(ticket);
+    }
+    
+    public List<Ticket> getTicketsAssignedToManager(String managerEmail) {
+        return ticketRepo.findByAssignedToAndStatus(managerEmail, "PENDING_APPROVAL");
+    }
+
+    public Ticket approveTicket(Long ticketId) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if (!"PENDING_APPROVAL".equals(ticket.getStatus())) {
+            throw new IllegalStateException("Ticket is not in pending state.");
+        }
+
+        ticket.setStatus("APPROVED");
+        return ticketRepo.save(ticket);
+    }
+    
 //    public List<Ticket> getTicketsByCreator(String createdBy) {
 //        return ticketRepo.findByCreatedBy(createdBy);
 //    }

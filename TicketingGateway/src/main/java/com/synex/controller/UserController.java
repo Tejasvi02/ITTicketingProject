@@ -7,6 +7,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.synex.component.TicketClient;
@@ -29,4 +31,15 @@ public class UserController {
         //System.out.println("Fetching tickets for: " + username); 
         return ticketClient.getTicketsByCreatedBy(username);
     }
+    
+    @PostMapping("/user/api/ticket/{id}/request-approval")
+    @ResponseBody
+    public Map<String, Object> requestApproval(
+            @PathVariable Long id,
+            Principal principal) {
+        ticketClient.sendForApproval(id, principal.getName());
+        return Map.of("message", "Sent for approval.");
+    }
+
+
 }

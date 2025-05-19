@@ -22,7 +22,7 @@
 
 	<security:authorize access="hasRole('MANAGER')">
 	    <p>Hello Manager</p>
-	    <a href="/manager/tickets" class="btn btn-info">View All Tickets</a>
+	    <a href="/manager/tickets"><button>Approve Tickets</button></a>
 	</security:authorize>
 
 	<security:authorize access="hasRole('USER')">

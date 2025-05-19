@@ -1,6 +1,8 @@
 package com.synex.controller;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,34 @@ public class TicketController {
 //        Ticket createdTicket = ticketService.createTicket(ticket);
 //        return new ResponseEntity<>(createdTicket, HttpStatus.CREATED);
 //    }
+    
+//    @PostMapping("/ticket/{id}/request-approval")
+//    public ResponseEntity<?> requestApproval(@PathVariable Long id, @RequestParam String managerEmail) {
+//        ticketService.sendForApproval(id, managerEmail);
+//        return ResponseEntity.ok().build();
+//    }
 
+    @PostMapping("/ticket/{id}/request-approval")
+    public ResponseEntity<?> requestApproval(
+            @PathVariable Long id,
+            @RequestParam String managerEmail) {
+
+        // 1) Decode URL‑encoded data
+        String decoded = URLDecoder.decode(managerEmail, StandardCharsets.UTF_8);
+
+        // 2) Trim off any stray quotes at start/end
+        if (decoded.startsWith("\"") && decoded.endsWith("\"")) {
+            decoded = decoded.substring(1, decoded.length() - 1);
+        }
+
+        // 3) Log what we’re about to save
+        System.out.println(">>> requestApproval raw managerEmail: `" + managerEmail + "`");
+        System.out.println(">>> requestApproval cleaned decoded: `" + decoded + "`");
+        System.out.println(">>> Length: " + decoded.length());
+
+        ticketService.sendForApproval(id, decoded);
+        return ResponseEntity.ok().build();
+    }
     
     @GetMapping("/createdby/{createdBy}")
     public List<Ticket> getTicketsByCreatedBy(@PathVariable String createdBy) {
@@ -83,4 +112,14 @@ public class TicketController {
   		return node;
   	}
 
+  	@GetMapping("/api/manager/tickets")
+  	public ResponseEntity<List<Ticket>> getTicketsToApprove(@RequestParam String managerEmail) {
+  	    return ResponseEntity.ok(ticketService.getTicketsAssignedToManager(managerEmail));
+  	}
+
+  	@PostMapping("/api/ticket/{id}/approve")
+  	public ResponseEntity<?> approveTicket(@PathVariable Long id) {
+  	    ticketService.approveTicket(id);
+  	    return ResponseEntity.ok().build();
+  	}
 }

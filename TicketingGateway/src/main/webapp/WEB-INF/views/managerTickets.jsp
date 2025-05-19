@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-    <title>My Tickets</title>
+    <title>Tickets to Approve</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         table {
@@ -22,7 +22,7 @@
     </style>
 </head>
 <body>
-    <h2>My Tickets</h2>
+    <h2>Tickets to Approve</h2>
     <table id="ticketTable">
         <thead>
             <tr>
@@ -30,7 +30,7 @@
                 <th>Title</th>
                 <th>Status</th>
                 <th>Created Date</th>
-				<th>Action</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -40,12 +40,10 @@
 
     <script>
         $(document).ready(function () {
-            $.get("/user/api/tickets", function (tickets) {
-                console.log("Tickets received:", tickets);
+            $.get("/manager/api/tickets", function (tickets) {
                 let rows = "";
                 if (tickets && tickets.length > 0) {
                     for (let t of tickets) {
-                        console.log("Ticket:", t);
                         let createdDate = "N/A";
                         try {
                             createdDate = new Date(t.creationDate).toLocaleString();
@@ -53,37 +51,31 @@
                             console.warn("Invalid date for ticket:", t);
                         }
 
-						rows += "<tr>" +
-						    "<td>" + t.id + "</td>" +
-						    "<td>" + t.title + "</td>" +
-						    "<td>" + t.status + "</td>" +
-						    "<td>" + createdDate + "</td>";
-
-						if (t.status === "OPEN") {
-						    rows += "<td><button onclick='sendForApproval(" + t.id + ")'>Send for Approval</button></td>";
-						} else {
-						    rows += "<td>-</td>";
-						}
-
-						rows += "</tr>";
+                        rows += "<tr>" +
+                            "<td>" + t.id + "</td>" +
+                            "<td>" + t.title + "</td>" +
+                            "<td>" + t.status + "</td>" +
+                            "<td>" + createdDate + "</td>" +
+                            "<td><button onclick='approveTicket(" + t.id + ")'>Approve</button></td>" +
+                            "</tr>";
                     }
                 } else {
-                    rows = `<tr><td colspan="4">No tickets found.</td></tr>`;
+                    rows = `<tr><td colspan="5">No pending tickets to approve.</td></tr>`;
                 }
                 $("#ticketTable tbody").html(rows);
             }).fail(function () {
-                $("#ticketTable tbody").html("<tr><td colspan='4'>Error loading tickets.</td></tr>");
+                $("#ticketTable tbody").html("<tr><td colspan='5'>Error loading tickets.</td></tr>");
             });
         });
-		
-		function sendForApproval(ticketId) {
-		    $.post("/user/api/ticket/" + ticketId + "/request-approval", function (response) {
-		        alert(response.message);
-		        location.reload();
-		    }).fail(function () {
-		        alert("Failed to send for approval.");
-		    });
-		}
+
+        function approveTicket(ticketId) {
+            $.post("/manager/api/ticket/" + ticketId + "/approve", function (response) {
+                alert(response.message);
+                location.reload();
+            }).fail(function () {
+                alert("Failed to approve ticket.");
+            });
+        }
     </script>
 </body>
 </html>

@@ -88,5 +88,16 @@ public class EmployeeRoleService {
 	            .findFirst()
 	            .orElse(null);
 	    }
+	    
+	    public String getManagerEmailForUser(String userEmail) {
+	        Employee employee = employeeRepo.findByEmail(userEmail);
+	        if (employee == null) throw new RuntimeException("Employee not found");
+
+	        Long managerId = employee.getManagerId();
+	        if (managerId == null) throw new RuntimeException("Manager ID not set");
+
+	        Employee manager = employeeRepo.findById(managerId).orElseThrow(() -> new RuntimeException("Manager not found"));
+	        return manager.getEmail();
+	    }
 
 }

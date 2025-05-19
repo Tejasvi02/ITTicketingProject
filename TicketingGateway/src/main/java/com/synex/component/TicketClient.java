@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synex.model.TicketForm;
 import com.synex.model.TicketModel;
+import com.synex.service.EmployeeRoleService;
 
 @Component
 public class TicketClient {
@@ -31,7 +33,13 @@ public class TicketClient {
 	private static final String createTicketUrl = "http://localhost:8383/tickets";
 	private static final String getAllTicketUrl = "http://localhost:8383/getAllTickets";
 	private static final String getUserTicketUrl = "http://localhost:8383/createdby/";
-
+    private static final String approvalUrl = "http://localhost:8282/manager/api/manager-email";
+    private static final String requestApprovalUrl = "http://localhost:8383/ticket/"; // append {id}/request-approval
+    private static final String ticketsToApproveUrl = "http://localhost:8383/api/manager/tickets?managerEmail=";
+    private static final String approveTicketUrl = "http://localhost:8383/api/ticket/"; // append {id}/approve
+    
+    @Autowired
+    private EmployeeRoleService employeeRoleService;
 
 	public String testGetClient(String data) {		
 		RestTemplate restTemplate = new RestTemplate();
@@ -107,13 +115,50 @@ public class TicketClient {
     }
     
     public List<Map<String, Object>> getTicketsByCreatedBy(String createdBy) {
-    	System.out.println("Calling microservice for createdBy: " + createdBy);
+    	//System.out.println("Calling microservice for createdBy: " + createdBy);
     	RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<List> response = restTemplate.getForEntity(getUserTicketUrl+createdBy, List.class);
-        System.out.println("Response from microservice: " + response.getBody());
+        //System.out.println("Response from microservice: " + response.getBody());
         return response.getBody();
     }
+    
+//    public void sendForApproval(Long ticketId, String username) {
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        // Get manager email as plain string
+//        ResponseEntity<String> response = restTemplate.getForEntity(approvalUrl + "?username=" + username, String.class);
+//        String managerEmail = response.getBody();
+//
+//        // Send to ticket microservice
+//        String url = requestApprovalUrl + ticketId + "/request-approval?managerEmail=" + managerEmail;
+//        restTemplate.postForEntity(url, null, Void.class);
+//    }
+    
+    public void sendForApproval(Long ticketId, String username) {
+        // 1) Direct lookup of manager email (no HTTP)
+        String managerEmail = employeeRoleService.getManagerEmailForUser(username);
+        RestTemplate restTemplate = new RestTemplate();
+        // 2) Forward to ticket microservice
+        String url = requestApprovalUrl
+                   + ticketId
+                   + "/request-approval?managerEmail="
+                   + managerEmail;
+        restTemplate.postForEntity(url, null, Void.class);
+    }
 
+    public List<Map<String, Object>> getTicketsToApprove(String managerEmail) {
+    	RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.getForObject(ticketsToApproveUrl + managerEmail, List.class);
+    }
+
+    public void approveTicket(Long ticketId) {
+    	RestTemplate restTemplate = new RestTemplate();
+        restTemplate.postForEntity(
+            approveTicketUrl + ticketId + "/approve",
+            null,
+            Void.class
+        );
+    }
 	//without file upload
 //    public ResponseEntity<String> createTicket(TicketForm form) throws Exception {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -127,51 +172,8 @@ public class TicketClient {
 //        RestTemplate restTemplate = new RestTemplate();
 //        return restTemplate.postForEntity(createTicketUrl, request, String.class);
 //    }
-//	
-//	@Value("${upload.dir}")
-//	private String uploadDir;
-//
-//	public ResponseEntity<String> createTicketWithFiles(TicketForm form, List<MultipartFile> files) throws Exception {
-//	    List<String> paths = new ArrayList<>();
-//
-//	    System.out.println("Files received in Client: " + files.size()); // Debug
-//	    for (MultipartFile file : files) {
-//	        System.out.println("Processing file: " + file.getOriginalFilename());
-//
-//	        if (!file.isEmpty()) {
-//	            String uuidFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-//	            File savedFile = new File(uploadDir, uuidFileName);
-//
-//	            System.out.println("Saving file to: " + savedFile.getAbsolutePath());
-//	            file.transferTo(savedFile);
-//	            paths.add(savedFile.getAbsolutePath());
-//	        } else {
-//	            System.out.println("Skipping empty file: " + file.getOriginalFilename());
-//	        }
-//	    }
-//
-//	    form.setFileAttachmentPaths(paths);
-//	    System.out.println("Final stored paths before sending to microservice: " + form.getFileAttachmentPaths());
-//
-//	    ObjectMapper mapper = new ObjectMapper();
-//	    String json = mapper.writeValueAsString(form);
-//
-//	    HttpHeaders headers = new HttpHeaders();
-//	    headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//	    HttpEntity<String> request = new HttpEntity<>(json, headers);
-//	    return new RestTemplate().postForEntity(createTicketUrl, request, String.class);
-//	}
-	
 
-//
-//    public List<TicketModel> getTicketsByUser(Long userId) {
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<TicketModel[]> response = restTemplate.getForEntity(
-//                TICKET_SERVICE_URL + "/tickets/user/" + userId, TicketModel[].class
-//        );
-//        return Arrays.asList(response.getBody());
-//    }
+
 //
 //    public void resolveTicket(Long ticketId, String adminId) {
 //        RestTemplate restTemplate = new RestTemplate();

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.synex.domain.Employee;
 import com.synex.domain.Role;
@@ -88,31 +90,30 @@ public class AccessController {
         return "adminPage"; // adminPage.jsp
     }
 
-    // Assign MANAGER role to a user without user assign
-//    @PostMapping("/admin/assign-role")
-//    public String assignManager(@RequestParam Long userId) {
-//        employeeRoleService.assignManagerRole(userId);
-//        return "redirect:/admin/users";
-//    }
-    
-    //Manager with user assignment try -1
-//    @PostMapping("/admin/assign-role")
-//    public String assignManager(@RequestParam Long userId,
-//                                @RequestParam(required = false, name = "assignedUserIds") List<Long> assignedUserIds,
-//                                Model model) {
-//        if (assignedUserIds == null || assignedUserIds.isEmpty()) {
-//            model.addAttribute("error", "You must assign at least one employee when making a manager.");
-//            return "redirect:/admin/users"; // optionally render the JSP with error
+
+//    
+//    @GetMapping(value = "/manager/api/manager-email", produces = MediaType.TEXT_PLAIN_VALUE)
+//    @ResponseBody
+//    public ResponseEntity<String> getManagerEmail(@RequestParam String username) {
+//    	System.out.println("↪︎ [AccessController] getManagerEmail called with username=" + username);
+//        Employee employee = employeeRoleService.findByEmail(username);
+//        System.out.println("↪︎ [AccessController] found employee: " + employee);
+//        if (employee == null || employee.getManagerId() == null) {
+//            return ResponseEntity.badRequest().body("Manager not found");
 //        }
 //
-//        employeeRoleService.assignManagerRole(userId);
-//
-//        for (Long assignedUserId : assignedUserIds) {
-//            employeeRoleService.setManagerForUser(assignedUserId, userId);
+//        Employee manager = employeeRoleService.getEmployeeById(employee.getManagerId());
+//        if (manager == null) {
+//            return ResponseEntity.badRequest().body("Manager not found");
 //        }
 //
-//        return "redirect:/admin/users";
+//        String manageremail = manager.getEmail();
+//        System.out.println("↪︎ [AccessController] returning manager email: " 
+//            + manageremail + " (length=" + manageremail.length() + ")");
+//        
+//        return ResponseEntity.ok(manageremail);
 //    }
+
 
     @PostMapping("/admin/assign-role")
     public String assignManager(@RequestParam Long userId,
