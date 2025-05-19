@@ -44,4 +44,12 @@ public class ManagerController {
         ticketClient.approveTicket(id);
         return ResponseEntity.ok(Map.of("message", "Ticket approved."));
     }
+    
+    @PreAuthorize("hasRole('MANAGER')")
+    @PostMapping("/api/ticket/{id}/reject")
+    @ResponseBody
+    public ResponseEntity<?> rejectTicket(@PathVariable Long id, Principal principal) {
+        ticketClient.rejectTicket(id, principal.getName());
+        return ResponseEntity.ok(Map.of("message", "Ticket rejected."));
+    }
 }

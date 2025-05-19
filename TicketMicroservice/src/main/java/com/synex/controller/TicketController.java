@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,16 @@ public class TicketController {
         return ResponseEntity.ok().build();
     }
     
+    @PostMapping("/ticket/{id}/reject")
+    public ResponseEntity<?> rejectTicket(
+        @PathVariable Long id,
+        @RequestParam String managerEmail
+    ) {
+        ticketService.rejectTicket(id, managerEmail);
+        return ResponseEntity.ok(Map.of("message","Ticket rejected."));
+    }
+
+    
     @GetMapping("/createdby/{createdBy}")
     public List<Ticket> getTicketsByCreatedBy(@PathVariable String createdBy) {
     	// System.out.println("Received request for createdBy: " + createdBy);
@@ -117,9 +128,14 @@ public class TicketController {
   	    return ResponseEntity.ok(ticketService.getTicketsAssignedToManager(managerEmail));
   	}
 
-  	@PostMapping("/api/ticket/{id}/approve")
-  	public ResponseEntity<?> approveTicket(@PathVariable Long id) {
-  	    ticketService.approveTicket(id);
-  	    return ResponseEntity.ok().build();
-  	}
+    @PostMapping("/ticket/{id}/approve")
+    public ResponseEntity<?> approveTicket(
+        @PathVariable Long id,
+        @RequestParam String adminEmail    // injected by Gateway
+    ) {
+        ticketService.approveTicket(id, adminEmail);
+        return ResponseEntity.ok(Map.of("message","Ticket approved."));
+    }
+
+
 }

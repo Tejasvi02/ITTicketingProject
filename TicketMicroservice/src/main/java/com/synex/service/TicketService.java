@@ -86,7 +86,7 @@ public class TicketService {
         return ticketRepo.findByAssignedToAndStatus(managerEmail, "PENDING_APPROVAL");
     }
 
-    public Ticket approveTicket(Long ticketId) {
+    public Ticket approveTicket(Long ticketId, String adminEmail) {
         Ticket ticket = ticketRepo.findById(ticketId)
             .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -95,6 +95,22 @@ public class TicketService {
         }
 
         ticket.setStatus("APPROVED");
+        ticket.setAssignedTo(adminEmail);
+        return ticketRepo.save(ticket);
+    }
+
+    // — New reject method —
+    public Ticket rejectTicket(Long ticketId, String managerEmail) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if (!"PENDING_APPROVAL".equals(ticket.getStatus()) ||
+            !ticket.getAssignedTo().equals(managerEmail)) {
+            throw new IllegalStateException("Cannot reject: not pending or not assigned to you.");
+        }
+
+        ticket.setStatus("REJECTED");
+        ticket.setAssignedTo(ticket.getCreatedBy());
         return ticketRepo.save(ticket);
     }
     
