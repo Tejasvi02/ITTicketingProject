@@ -130,4 +130,50 @@ public class TicketService {
     }
 
 
+    public Ticket getTicketById(Long id) {
+        return ticketRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+    }
+
+
+    public Ticket save(Ticket ticket) {
+        return ticketRepo.save(ticket);
+    }
+
+    public Ticket updateTicket(Long id, Ticket updatedData) {
+        Ticket existing = ticketRepo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+
+        existing.setDescription(updatedData.getDescription());
+        existing.setPriority(updatedData.getPriority());
+        existing.setCategory(updatedData.getCategory());
+        existing.setFileAttachmentPaths(updatedData.getFileAttachmentPaths());
+        // Optional: status change logic here
+
+        return ticketRepo.save(existing);
+    }
+
+    
+    
+    public void deleteFileAttachment(Long ticketId, String filename) {
+        Ticket ticket = ticketRepo.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        List<String> paths = ticket.getFileAttachmentPaths();
+        if (paths != null && !paths.isEmpty()) {
+            paths.removeIf(path -> path.endsWith(filename));
+            ticket.setFileAttachmentPaths(paths);
+            ticketRepo.save(ticket);
+
+            // Also delete the actual file
+            for (String path : paths) {
+                if (path.endsWith(filename)) {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }

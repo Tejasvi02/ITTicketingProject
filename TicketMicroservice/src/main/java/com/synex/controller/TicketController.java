@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -142,7 +143,39 @@ public class TicketController {
         ticketService.closeTicket(id);
         return ResponseEntity.ok(Map.of("message", "Ticket closed."));
     }
+    
+    @GetMapping("/ticket/{id}")
+    public ResponseEntity<Ticket> getTicket(@PathVariable Long id) {
+        Ticket ticket = ticketService.getTicketById(id);
+        return ResponseEntity.ok(ticket);
+    }
 
+//    @PutMapping("/ticket/{id}/update")
+//    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Ticket updatedTicket) {
+//        Ticket ticket = ticketService.getTicketById(id);
+//
+//        // Only update allowed fields (description, priority, category, fileAttachmentPaths)
+//        ticket.setDescription(updatedTicket.getDescription());
+//        ticket.setPriority(updatedTicket.getPriority());
+//        ticket.setCategory(updatedTicket.getCategory());
+//        ticket.setFileAttachmentPaths(updatedTicket.getFileAttachmentPaths());
+//
+//        Ticket saved = ticketService.save(ticket);
+//        return ResponseEntity.ok(saved);
+//    }
+//    
+    @PutMapping("/ticket/{id}")
+    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Ticket ticket) {
+        Ticket updated = ticketService.updateTicket(id, ticket);
+        return ResponseEntity.ok(updated);
+    }
+
+
+    @DeleteMapping("/{id}/file/{filename}/delete")
+    public ResponseEntity<String> deleteAttachment(@PathVariable Long id, @PathVariable String filename) {
+        ticketService.deleteFileAttachment(id, filename);
+        return ResponseEntity.ok("Attachment deleted successfully");
+    }
 
 
 }

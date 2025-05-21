@@ -53,7 +53,7 @@
                             console.warn("Invalid date for ticket:", t);
                         }
 
-						rows += "<tr>" +
+						rows += "<tr onclick='viewTicket(" + t.id + ")'>" +
 						    "<td>" + t.id + "</td>" +
 						    "<td>" + t.title + "</td>" +
 						    "<td>" + t.status + "</td>" +
@@ -81,6 +81,9 @@
             });
         });
 		
+		function viewTicket(ticketId) {
+		    window.location.href = "/user/ticket/" + ticketId + "/edit";
+		}
 		function sendForApproval(ticketId) {
 		    $.post("/user/api/ticket/" + ticketId + "/request-approval", function (response) {
 		        alert(response.message);

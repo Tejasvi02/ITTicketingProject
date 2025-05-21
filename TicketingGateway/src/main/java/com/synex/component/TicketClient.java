@@ -1,6 +1,7 @@
 package com.synex.component;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,6 +71,8 @@ public class TicketClient {
 	}
 	@Value("${upload.dir}")
     private String uploadDir;
+	
+	//Create ticket
 	public ResponseEntity<String> createTicketWithFiles(TicketForm form, List<MultipartFile> files) throws Exception {
 	    List<String> paths = new ArrayList<>();
 
@@ -101,8 +105,41 @@ public class TicketClient {
 	    return new RestTemplate().postForEntity(createTicketUrl, request, String.class);
 	}
 	
-	
-	
+	//update ticket
+    public void updateTicketWithFiles(Long id, TicketForm form, List<MultipartFile> newFiles) throws IOException {
+        // Ensure upload directory exists
+        File uploadFolder = new File(uploadDir);
+        if (!uploadFolder.exists()) {
+            uploadFolder.mkdirs();
+        }
+
+        // Get existing ticket to preserve current attachments
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> response = restTemplate.getForEntity(baseTicketUrl + id, Map.class);
+        Map<String, Object> ticketMap = response.getBody();
+        List<String> currentPaths = (List<String>) ticketMap.get("fileAttachmentPaths");
+        List<String> updatedPaths = new ArrayList<>();
+        if (currentPaths != null) updatedPaths.addAll(currentPaths);
+
+        // Save new files
+        for (MultipartFile file : newFiles) {
+            if (!file.isEmpty()) {
+                String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                File saved = new File(uploadDir, uniqueName);
+                file.transferTo(saved);
+                updatedPaths.add(saved.getAbsolutePath());
+            }
+        }
+
+        form.setFileAttachmentPaths(updatedPaths);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TicketForm> entity = new HttpEntity<>(form, headers);
+
+        restTemplate.put(baseTicketUrl + id, entity);
+    }
+
     public List<Map<String, Object>> getAllTickets() {
     	RestTemplate restTemplate = new RestTemplate();
         return restTemplate.getForObject(getAllTicketUrl, List.class);
@@ -171,6 +208,14 @@ public class TicketClient {
     String url = baseTicketUrl + ticketId + "/close";
     new RestTemplate().postForEntity(url, null, Void.class);
     }	
+    
+    public Map<String, Object> getTicketById(Long id) {
+        String url = baseTicketUrl + id;
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.getForObject(url, Map.class);
+    }
+
+
     
 	//without file upload
 //    public ResponseEntity<String> createTicket(TicketForm form) throws Exception {

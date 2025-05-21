@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -85,24 +86,6 @@ public class TicketGatewayController {
         }
     }
 
-// Without createdby
-//    @PostMapping("/submitTicket")
-//    public String submitTicket(@ModelAttribute TicketForm form,
-//                               @RequestParam("files") MultipartFile[] files,
-//                               Model model) {
-//        try {
-//            List<MultipartFile> fileList = Arrays.asList(files);
-//            ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
-//            ObjectMapper mapper = new ObjectMapper();
-//            Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
-//            model.addAttribute("response", createdTicket);
-//            return "ticketSuccess";
-//        } catch (Exception e) {
-//            model.addAttribute("error", "Error submitting ticket: " + e.getMessage());
-//            return "ticketForm";
-//        }
-//    }
-
     
     @GetMapping("/viewTickets")
     @ResponseBody
@@ -119,33 +102,13 @@ public class TicketGatewayController {
     }
     
     
-
-    
-//    @GetMapping("/admin/tickets")
-//    public String viewAllTicketsForAdmin(Model model) {
-//        List<TicketModel> tickets = ticketClient.getAllTickets();
-//        System.out.println("Calling getAllTickets() from controller");
-//        if (tickets != null) {
-//            model.addAttribute("tickets", tickets);
-//            System.out.println("gateway ticket not null");
-//        } else {
-//            model.addAttribute("tickets", new ArrayList<>());
-//        }
-//        return "adminViewTickets";
-//    }
-//    
-//    @GetMapping("/user/tickets")
-//    public String viewUserTickets(Model model, Principal principal) {
-//        // Assuming principal.getName() returns a unique username or userId
-//        String username = principal.getName(); // or retrieve from session if needed
-//
-//        // You might convert it to Long if needed based on your userId type
-//        Long userId = Long.parseLong(username); // or use a service to get userId by email/username
-//
-//        List<TicketModel> userTickets = ticketClient.getTicketsByUser(userId);
-//        model.addAttribute("tickets", userTickets);
-//        return "userViewTickets";
-//    }
+    @PostMapping("/update-ticket/{id}")
+    public String updateTicket(@PathVariable Long id,
+                               @ModelAttribute TicketForm form,
+                               @RequestParam("files") List<MultipartFile> newFiles) throws Exception {
+        ticketClient.updateTicketWithFiles(id, form, newFiles);
+        return "redirect:/ticket/edit/" + id;
+    }
 
 }
 
