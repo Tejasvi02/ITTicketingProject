@@ -24,19 +24,13 @@
     </p>
 
     <p>Category:
-        <select name="category">
-			<option ${ticket.category == 'IT' ? 'selected' : ''}>IT</option>
-            <option ${ticket.category == 'BUG' ? 'selected' : ''}>BUG</option>
-            <option ${ticket.category == 'FEATURE' ? 'selected' : ''}>FEATURE</option>
-            <option ${ticket.category == 'SUPPORT' ? 'selected' : ''}>SUPPORT</option>
-        </select>
+		<input type="text" name="category" value="${ticket.category}" />
     </p>
 
     <p>Existing Attachments:</p>
     <ul id="attachments">
 		<c:forEach var="file" items="${ticket.fileNames}">
 		    <li>${file}
-		        <button type="button" onclick="deleteFile('${file}')">Delete</button>
 		    </li>
 		</c:forEach>
     </ul>
@@ -90,19 +84,6 @@
         });
     }
 
-    function deleteFile(fileName) {
-        $.ajax({
-            url: "/user/api/ticket/${ticket.id}/file/" + encodeURIComponent(fileName) + "/delete",
-            type: "DELETE",
-            success: function () {
-                alert("File deleted");
-                location.reload();
-            },
-            error: function () {
-                alert("File deletion failed");
-            }
-        });
-    }
 </script>
 </body>
 </html>

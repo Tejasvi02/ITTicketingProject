@@ -151,29 +151,4 @@ public class TicketService {
 
         return ticketRepo.save(existing);
     }
-
-    
-    
-    public void deleteFileAttachment(Long ticketId, String filename) {
-        Ticket ticket = ticketRepo.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
-
-        List<String> paths = ticket.getFileAttachmentPaths();
-        if (paths != null && !paths.isEmpty()) {
-            paths.removeIf(path -> path.endsWith(filename));
-            ticket.setFileAttachmentPaths(paths);
-            ticketRepo.save(ticket);
-
-            // Also delete the actual file
-            for (String path : paths) {
-                if (path.endsWith(filename)) {
-                    File file = new File(path);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    break;
-                }
-            }
-        }
-    }
 }
