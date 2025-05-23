@@ -54,6 +54,7 @@
     </c:when>
 </c:choose>
 <p><a href="/user/tickets">← Back to My Tickets</a></p>
+<a href="/home" class="btn btn-secondary">← Back to Home</a>
 <script>
     $('#updateForm').on('submit', function (e) {
         e.preventDefault();
@@ -83,6 +84,33 @@
             alert("Action failed.");
         });
     }
+	function sendForApproval(ticketId) {
+	       $.post("/user/api/ticket/" + ticketId + "/request-approval", function (response) {
+	           alert(response.message);
+	           location.reload();
+	       }).fail(function () {
+	           alert("Failed to send for approval.");
+	       });
+	   }
+
+	   function changeStatus(ticketId, newStatus) {
+	       let url = "";
+	       if (newStatus === 'REOPENED') {
+	           url = "/user/api/ticket/" + ticketId + "/reopen";
+	       } else if (newStatus === 'CLOSED') {
+	           url = "/user/api/ticket/" + ticketId + "/close";
+	       } else {
+	           alert("Invalid status change");
+	           return;
+	       }
+
+	       $.post(url, function (response) {
+	           alert(response.message);
+	           location.reload();
+	       }).fail(function () {
+	           alert("Failed to change status.");
+	       });
+	   }
 
 </script>
 </body>

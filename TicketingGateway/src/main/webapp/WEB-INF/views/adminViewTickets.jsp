@@ -70,6 +70,7 @@
             });
         });
     </script>
+	<p><a href="/home">← Back to Home</a></p>
 </body>
 </html>
 
