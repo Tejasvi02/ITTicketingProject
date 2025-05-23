@@ -24,15 +24,14 @@
     </p>
 
     <p>Category:
-		<input type="text" name="category" value="${ticket.category}" />
+        <input type="text" name="category" value="${ticket.category}" />
     </p>
 
     <p>Existing Attachments:</p>
     <ul id="attachments">
-		<c:forEach var="file" items="${ticket.fileNames}">
-		    <li>${file}
-		    </li>
-		</c:forEach>
+        <c:forEach var="file" items="${ticket.fileNames}">
+            <li>${file}</li>
+        </c:forEach>
     </ul>
 
     <p>Upload more files: <input type="file" name="files" multiple/></p>
@@ -41,21 +40,55 @@
 </form>
 
 <hr>
-<c:choose>
-    <c:when test="${ticket.status == 'OPEN' || ticket.status == 'REOPENED'}">
-        <button onclick="sendForApproval(${ticket.id})">Send for Approval</button>
-    </c:when>
-</c:choose>
 
-<c:choose>
-    <c:when test="${ticket.status == 'RESOLVED'}">
-        <button onclick="changeStatus(${ticket.id}, 'REOPENED')">Reopen</button>
-        <button onclick="changeStatus(${ticket.id}, 'CLOSED')">Close</button>
-    </c:when>
-</c:choose>
+<c:if test="${ticket.status == 'OPEN' || ticket.status == 'REOPENED' || ticket.status == 'REJECTED'}">
+    <button id="sendApprovalBtn" onclick="sendForApproval(${ticket.id})" style="display: none;">Send for Approval</button>
+</c:if>
+
+<c:if test="${ticket.status == 'RESOLVED'}">
+    <button onclick="changeStatus(${ticket.id}, 'REOPENED')">Reopen</button>
+    <button onclick="changeStatus(${ticket.id}, 'CLOSED')">Close</button>
+</c:if>
+
 <p><a href="/user/tickets">← Back to My Tickets</a></p>
 <a href="/home" class="btn btn-secondary">← Back to Home</a>
+
 <script>
+    // Store original values for change detection
+    let originalData = {
+        description: $('textarea[name="description"]').val(),
+        priority: $('select[name="priority"]').val(),
+        category: $('input[name="category"]').val()
+    };
+
+    function checkForChanges() {
+        const currentData = {
+            description: $('textarea[name="description"]').val(),
+            priority: $('select[name="priority"]').val(),
+            category: $('input[name="category"]').val()
+        };
+
+        const changed =
+            currentData.description !== originalData.description ||
+            currentData.priority !== originalData.priority ||
+            currentData.category !== originalData.category;
+
+        // Only show button if status is REJECTED and user made changes
+        if ('${ticket.status}' === 'REJECTED' && changed) {
+            $('#sendApprovalBtn').show();
+        } else if ('${ticket.status}' === 'OPEN' || '${ticket.status}' === 'REOPENED') {
+            $('#sendApprovalBtn').show();
+        } else {
+            $('#sendApprovalBtn').hide();
+        }
+    }
+
+    // Trigger check on input change
+    $('textarea[name="description"], select[name="priority"], input[name="category"]').on('input change', checkForChanges);
+
+    // Initial check
+    checkForChanges();
+
     $('#updateForm').on('submit', function (e) {
         e.preventDefault();
         let form = new FormData(this);
@@ -76,42 +109,33 @@
         });
     });
 
-    function performAction(action) {
-        $.post("/user/api/ticket/${ticket.id}/" + action, function (res) {
-            alert(res.message);
+    function sendForApproval(ticketId) {
+        $.post("/user/api/ticket/" + ticketId + "/request-approval", function (response) {
+            alert(response.message);
             location.reload();
         }).fail(function () {
-            alert("Action failed.");
+            alert("Failed to send for approval.");
         });
     }
-	function sendForApproval(ticketId) {
-	       $.post("/user/api/ticket/" + ticketId + "/request-approval", function (response) {
-	           alert(response.message);
-	           location.reload();
-	       }).fail(function () {
-	           alert("Failed to send for approval.");
-	       });
-	   }
 
-	   function changeStatus(ticketId, newStatus) {
-	       let url = "";
-	       if (newStatus === 'REOPENED') {
-	           url = "/user/api/ticket/" + ticketId + "/reopen";
-	       } else if (newStatus === 'CLOSED') {
-	           url = "/user/api/ticket/" + ticketId + "/close";
-	       } else {
-	           alert("Invalid status change");
-	           return;
-	       }
+    function changeStatus(ticketId, newStatus) {
+        let url = "";
+        if (newStatus === 'REOPENED') {
+            url = "/user/api/ticket/" + ticketId + "/reopen";
+        } else if (newStatus === 'CLOSED') {
+            url = "/user/api/ticket/" + ticketId + "/close";
+        } else {
+            alert("Invalid status change");
+            return;
+        }
 
-	       $.post(url, function (response) {
-	           alert(response.message);
-	           location.reload();
-	       }).fail(function () {
-	           alert("Failed to change status.");
-	       });
-	   }
-
+        $.post(url, function (response) {
+            alert(response.message);
+            location.reload();
+        }).fail(function () {
+            alert("Failed to change status.");
+        });
+    }
 </script>
 </body>
 </html>
