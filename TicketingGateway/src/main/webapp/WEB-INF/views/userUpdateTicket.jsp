@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <html>
 <head>
     <title>Update Ticket</title>
@@ -8,7 +9,7 @@
 <body>
 <h2>Update Ticket - ID: ${ticket.id}</h2>
 
-<form id="updateForm" action="/user/ticket/${ticket.id}/update" method="post" enctype="multipart/form-data">
+<form id="updateForm" enctype="multipart/form-data">
     <p>Title: ${ticket.title}</p>
 
     <p>Description:<br/>
@@ -17,9 +18,9 @@
 
     <p>Priority:
         <select name="priority">
-            <option ${ticket.priority == 'LOW' ? 'selected' : ''}>LOW</option>
-            <option ${ticket.priority == 'MEDIUM' ? 'selected' : ''}>MEDIUM</option>
-            <option ${ticket.priority == 'HIGH' ? 'selected' : ''}>HIGH</option>
+            <option value="LOW" ${ticket.priority == 'LOW' ? 'selected' : ''}>LOW</option>
+            <option value="MEDIUM" ${ticket.priority == 'MEDIUM' ? 'selected' : ''}>MEDIUM</option>
+            <option value="HIGH" ${ticket.priority == 'HIGH' ? 'selected' : ''}>HIGH</option>
         </select>
     </p>
 
@@ -34,7 +35,7 @@
         </c:forEach>
     </ul>
 
-    <p>Upload more files: <input type="file" name="files" multiple/></p>
+    <p>Upload more files: <input type="file" name="files" multiple /></p>
 
     <button type="submit">Update Ticket</button>
 </form>
@@ -50,12 +51,18 @@
     <button onclick="changeStatus(${ticket.id}, 'CLOSED')">Close</button>
 </c:if>
 
+<hr>
+
+<!-- View History Section -->
+<h3>Ticket History</h3>
+<button onclick="fetchHistory(${ticket.id})">View History</button>
+<div id="historyContainer" style="margin-top: 10px; padding: 10px; border: 1px solid #ccc;"></div>
+
 <p><a href="/user/tickets">← Back to My Tickets</a></p>
 <a href="/home" class="btn btn-secondary">← Back to Home</a>
 
 <script>
-    // Store original values for change detection
-    let originalData = {
+    const originalData = {
         description: $('textarea[name="description"]').val(),
         priority: $('select[name="priority"]').val(),
         category: $('input[name="category"]').val()
@@ -73,7 +80,6 @@
             currentData.priority !== originalData.priority ||
             currentData.category !== originalData.category;
 
-        // Only show button if status is REJECTED and user made changes
         if ('${ticket.status}' === 'REJECTED' && changed) {
             $('#sendApprovalBtn').show();
         } else if ('${ticket.status}' === 'OPEN' || '${ticket.status}' === 'REOPENED') {
@@ -83,28 +89,26 @@
         }
     }
 
-    // Trigger check on input change
     $('textarea[name="description"], select[name="priority"], input[name="category"]').on('input change', checkForChanges);
-
-    // Initial check
     checkForChanges();
 
     $('#updateForm').on('submit', function (e) {
         e.preventDefault();
-        let form = new FormData(this);
+        let formData = new FormData(this);
+        formData.append("id", ${ticket.id});
 
         $.ajax({
             url: "/user/api/ticket/${ticket.id}/update",
             method: "POST",
-            data: form,
+            data: formData,
             contentType: false,
             processData: false,
             success: function () {
-                alert("Updated successfully");
+                alert("Ticket updated successfully.");
                 location.reload();
             },
             error: function () {
-                alert("Update failed");
+                alert("Ticket update failed.");
             }
         });
     });
@@ -119,23 +123,59 @@
     }
 
     function changeStatus(ticketId, newStatus) {
-        let url = "";
-        if (newStatus === 'REOPENED') {
-            url = "/user/api/ticket/" + ticketId + "/reopen";
-        } else if (newStatus === 'CLOSED') {
-            url = "/user/api/ticket/" + ticketId + "/close";
-        } else {
-            alert("Invalid status change");
-            return;
-        }
+        let url = newStatus === 'REOPENED'
+            ? "/user/api/ticket/" + ticketId + "/reopen"
+            : "/user/api/ticket/" + ticketId + "/close";
 
         $.post(url, function (response) {
             alert(response.message);
             location.reload();
         }).fail(function () {
-            alert("Failed to change status.");
+            alert("Failed to change ticket status.");
         });
     }
+
+	function fetchHistory(ticketId) {
+	    $('#historyContainer').html("Loading...");
+
+	    $.get("/user/api/ticket/" + ticketId + "/history", function (data) {
+	        console.log("✅ Data received:", data);
+
+	        if (!Array.isArray(data) || data.length === 0) {
+	            $('#historyContainer').html("<p>No history available.</p>");
+	            return;
+	        }
+
+	        let html = "";
+
+	        data.forEach(entry => {
+	            const action = entry.action || "-";
+	            const date = entry.actionDate ? new Date(entry.actionDate).toLocaleString() : "-";
+	            const by = entry.actionBy || "-";
+	            const comments = entry.comments || "-";
+
+	            html += '' +
+	                '<div style="' +
+	                'margin-bottom: 15px;' +
+	                'padding: 15px;' +
+	                'border-left: 4px solid #007bff;' +
+	                'background: #e9f5ff;' +
+	                'border-radius: 6px;' +
+	                'box-shadow: 0 1px 3px rgba(0,0,0,0.1);' +
+	                '">' +
+	                '<p><strong>🛠️ Action:</strong> ' + action + '</p>' +
+	                '<p><strong>📅 Date:</strong> ' + date + '</p>' +
+	                '<p><strong>👤 By:</strong> ' + by + '</p>' +
+	                '<p><strong>💬 Comments:</strong> ' + comments + '</p>' +
+	                '</div>';
+	        });
+
+	        $('#historyContainer').html(html);
+	    }).fail(function () {
+	        $('#historyContainer').html("<p style='color:red;'>Failed to load history.</p>");
+	    });
+	}
+
 </script>
 </body>
 </html>

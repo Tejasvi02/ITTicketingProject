@@ -1,5 +1,6 @@
 package com.synex.domain;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -25,11 +26,11 @@ public class TicketHistory {
 
     private String action; // CREATED, etc.
 
-    //@ManyToOne
-    //private Employee actionBy;
-
-    private Date actionDate;
+    private LocalDateTime  actionDate;
     private String comments;
+    
+    private String actionBy;
+    
 	public Long getId() {
 		return id;
 	}
@@ -48,10 +49,10 @@ public class TicketHistory {
 	public void setAction(String action) {
 		this.action = action;
 	}
-	public Date getActionDate() {
+	public LocalDateTime  getActionDate() {
 		return actionDate;
 	}
-	public void setActionDate(Date actionDate) {
+	public void setActionDate(LocalDateTime  actionDate) {
 		this.actionDate = actionDate;
 	}
 	public String getComments() {
@@ -59,6 +60,12 @@ public class TicketHistory {
 	}
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+	public String getActionBy() {
+		return actionBy;
+	}
+	public void setActionBy(String actionBy) {
+		this.actionBy = actionBy;
 	}
 
     

@@ -3,6 +3,7 @@ package com.synex.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ public class TicketService {
     @Autowired
     TicketHistoryRepository historyRepo;
     
+    
 
     public Ticket createTicket(Ticket ticket) {
         ticket.setCreationDate(new Date());
@@ -37,7 +39,8 @@ public class TicketService {
         TicketHistory history = new TicketHistory();
         history.setTicket(saved);
         history.setAction("CREATED");
-        history.setActionDate(new Date());
+        history.setActionDate(LocalDateTime.now());
+        history.setActionBy(ticket.getCreatedBy());
         history.setComments("Ticket created");
         historyRepo.save(history);
 
@@ -61,7 +64,9 @@ public class TicketService {
 
         ticket.setStatus("PENDING_APPROVAL");
         ticket.setAssignedTo(managerEmail);
-        ticketRepo.save(ticket);
+        Ticket updated = ticketRepo.save(ticket);
+
+        logHistory(updated, "SENT_FOR_APPROVAL", "Ticket sent for approval to manager: " + managerEmail,ticket.getCreatedBy());
     }
     
     public List<Ticket> getTicketsAssignedToManager(String managerEmail) {
@@ -75,10 +80,13 @@ public class TicketService {
         if (!"PENDING_APPROVAL".equals(ticket.getStatus())) {
             throw new IllegalStateException("Ticket is not in pending state.");
         }
-
+        String manageremail = ticket.getAssignedTo();
         ticket.setStatus("APPROVED");
         ticket.setAssignedTo(adminEmail);
-        return ticketRepo.save(ticket);
+        Ticket updated = ticketRepo.save(ticket);
+
+        logHistory(updated, "APPROVED", "Ticket approved and assigned to admin: " + adminEmail,manageremail);
+        return updated;
     }
 
     // — New reject method —
@@ -93,7 +101,10 @@ public class TicketService {
 
         ticket.setStatus("REJECTED");
         ticket.setAssignedTo(ticket.getCreatedBy());
-        return ticketRepo.save(ticket);
+        Ticket updated = ticketRepo.save(ticket);
+
+        logHistory(updated, "REJECTED", "Ticket rejected by manager: " + managerEmail,managerEmail);
+        return updated;
     }
     
     public Ticket resolveTicket(Long ticketId) {
@@ -106,7 +117,10 @@ public class TicketService {
 
         ticket.setStatus("RESOLVED");
         ticket.setAssignedTo(ticket.getCreatedBy()); // Reassign to creator
-        return ticketRepo.save(ticket);
+        Ticket updated = ticketRepo.save(ticket);
+
+        logHistory(updated, "RESOLVED", "Ticket resolved by admin","admin@gmail.com");
+        return updated;
     }
     
     public Ticket reopenTicket(Long ticketId) {
@@ -116,7 +130,10 @@ public class TicketService {
             throw new IllegalStateException("Only resolved tickets can be reopened.");
         }
         ticket.setStatus("REOPENED");
-        return ticketRepo.save(ticket);
+        Ticket updated = ticketRepo.save(ticket);
+
+        logHistory(updated, "REOPENED", "Ticket reopened by user",ticket.getCreatedBy());
+        return updated;
     }
 
     public Ticket closeTicket(Long ticketId) {
@@ -126,7 +143,10 @@ public class TicketService {
             throw new IllegalStateException("Only resolved tickets can be closed.");
         }
         ticket.setStatus("CLOSED");
-        return ticketRepo.save(ticket);
+        Ticket updated = ticketRepo.save(ticket);
+
+        logHistory(updated, "CLOSED", "Ticket closed by user",ticket.getCreatedBy());
+        return updated;
     }
 
 
@@ -147,8 +167,24 @@ public class TicketService {
         existing.setPriority(updatedData.getPriority());
         existing.setCategory(updatedData.getCategory());
         existing.setFileAttachmentPaths(updatedData.getFileAttachmentPaths());
-        // Optional: status change logic here
 
-        return ticketRepo.save(existing);
+        Ticket updated = ticketRepo.save(existing);
+        logHistory(updated, "UPDATED", "Ticket fields updated",updated.getCreatedBy());
+        return updated;
+    }
+    
+    //ticket history
+    private void logHistory(Ticket ticket, String action, String comments, String actionBy) {
+        TicketHistory history = new TicketHistory();
+        history.setTicket(ticket);
+        history.setAction(action);
+        history.setComments(comments);
+        history.setActionDate(LocalDateTime.now());
+        history.setActionBy(actionBy);
+        historyRepo.save(history);
+    }
+    
+    public List<TicketHistory> getHistoryByTicketId(Long ticketId) {
+        return historyRepo.findByTicketId(ticketId);
     }
 }

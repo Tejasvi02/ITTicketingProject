@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synex.model.TicketForm;
+import com.synex.model.TicketHistoryDTO;
 import com.synex.service.EmployeeRoleService;
 
 @Component
@@ -154,15 +156,27 @@ public class TicketClient {
     }
     
     
+//    public void sendForApproval(Long ticketId, String username) {
+//        // 1) Direct lookup of manager email (no HTTP)
+//        String managerEmail = employeeRoleService.getManagerEmailForUser(username);
+//        RestTemplate restTemplate = new RestTemplate();
+//        // 2) Forward to ticket microservice
+//        String url = requestApprovalUrl
+//                   + ticketId
+//                   + "/request-approval?managerEmail="
+//                   + managerEmail;
+//        restTemplate.postForEntity(url, null, Void.class);
+//    }
+    
     public void sendForApproval(Long ticketId, String username) {
-        // 1) Direct lookup of manager email (no HTTP)
         String managerEmail = employeeRoleService.getManagerEmailForUser(username);
         RestTemplate restTemplate = new RestTemplate();
-        // 2) Forward to ticket microservice
         String url = requestApprovalUrl
                    + ticketId
                    + "/request-approval?managerEmail="
-                   + managerEmail;
+                   + managerEmail
+                   + "&actionBy="
+                   + username;
         restTemplate.postForEntity(url, null, Void.class);
     }
 
@@ -214,22 +228,20 @@ public class TicketClient {
         RestTemplate restTemplate = new RestTemplate();
         return restTemplate.getForObject(url, Map.class);
     }
-
-
     
-	//without file upload
-//    public ResponseEntity<String> createTicket(TicketForm form) throws Exception {
-//        ObjectMapper mapper = new ObjectMapper();
-//        String json = mapper.writeValueAsString(form);
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//        HttpEntity<String> request = new HttpEntity<>(json, headers);
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//        return restTemplate.postForEntity(createTicketUrl, request, String.class);
-//    }
+    public List<Map<String, Object>> getTicketHistory(Long ticketId) {
+        String url = baseTicketUrl + ticketId + "/history";
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<List<Map<String,Object>>> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<Map<String,Object>>>() {}
+        );
+        return response.getBody();
+    }
+
 
 
 }

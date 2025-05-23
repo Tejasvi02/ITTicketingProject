@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synex.domain.Ticket;
+import com.synex.domain.TicketHistory;
 import com.synex.service.TicketService;
 
 @RestController
@@ -145,24 +146,16 @@ public class TicketController {
         return ResponseEntity.ok(ticket);
     }
 
-//    @PutMapping("/ticket/{id}/update")
-//    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Ticket updatedTicket) {
-//        Ticket ticket = ticketService.getTicketById(id);
-//
-//        // Only update allowed fields (description, priority, category, fileAttachmentPaths)
-//        ticket.setDescription(updatedTicket.getDescription());
-//        ticket.setPriority(updatedTicket.getPriority());
-//        ticket.setCategory(updatedTicket.getCategory());
-//        ticket.setFileAttachmentPaths(updatedTicket.getFileAttachmentPaths());
-//
-//        Ticket saved = ticketService.save(ticket);
-//        return ResponseEntity.ok(saved);
-//    }
-//    
     @PutMapping("/ticket/{id}")
     public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Ticket ticket) {
         Ticket updated = ticketService.updateTicket(id, ticket);
         return ResponseEntity.ok(updated);
+    }
+    
+    @GetMapping("/ticket/{id}/history")
+    public ResponseEntity<List<TicketHistory>> getTicketHistory(@PathVariable Long id) {
+        List<TicketHistory> history = ticketService.getHistoryByTicketId(id);
+        return ResponseEntity.ok(history);
     }
 
 
