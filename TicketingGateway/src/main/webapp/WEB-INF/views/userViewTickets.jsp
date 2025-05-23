@@ -60,11 +60,11 @@
 						    "<td>" + createdDate + "</td>";
 
 							if (t.status === "OPEN" || t.status === "REOPENED") {
-							    rows += "<td><button onclick='sendForApproval(" + t.id + ")'>Send for Approval</button></td>";
+							    rows += "<td><button onclick='event.stopPropagation();sendForApproval(" + t.id + ")'>Send for Approval</button></td>";
 							} else if (t.status === "RESOLVED") {
 							    rows += "<td>" +
-							        "<a href='#' onclick='reopenTicket(" + t.id + ")'>Reopen</a> | " +
-							        "<a href='#' onclick='closeTicket(" + t.id + ")'>Close</a>" +
+							        "<a href='#' onclick='event.stopPropagation();reopenTicket(" + t.id + ")'>Reopen</a> | " +
+							        "<a href='#' onclick='event.stopPropagation();closeTicket(" + t.id + ")'>Close</a>" +
 							        "</td>";
 							} else {
 							    rows += "<td>-</td>";
