@@ -155,6 +155,7 @@ public class TicketController {
     @GetMapping("/ticket/{id}/history")
     public ResponseEntity<List<TicketHistory>> getTicketHistory(@PathVariable Long id) {
         List<TicketHistory> history = ticketService.getHistoryByTicketId(id);
+        history.sort((h1, h2) -> h2.getActionDate().compareTo(h1.getActionDate()));
         return ResponseEntity.ok(history);
     }
 
