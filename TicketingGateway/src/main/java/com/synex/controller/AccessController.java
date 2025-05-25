@@ -61,9 +61,17 @@ public class AccessController {
         if (request.getUserPrincipal() == null) {
             return "redirect:/login";
         }
-        String username = request.getUserPrincipal().getName();
-        request.getSession().setAttribute("userName", username);
-        return "home"; // home.jsp
+
+        String email = request.getUserPrincipal().getName();
+        Employee employee = employeeRoleService.findByEmail(email);
+
+        if (employee != null && employee.getName() != null) {
+            request.getSession().setAttribute("userName", employee.getName());
+        } else {
+            request.getSession().setAttribute("userName", email); // fallback to email
+        }
+
+        return "home";
     }
 
     @GetMapping("/logout-success")

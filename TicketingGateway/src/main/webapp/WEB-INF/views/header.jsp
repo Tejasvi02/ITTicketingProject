@@ -10,10 +10,12 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
     <a class="navbar-brand" href="/home">IT Ticketing</a>
-	<span class="text-white me-3">
-	    <i class="bi bi-person-circle"></i>
-	    <c:out value="${sessionScope.userName}" />
-	</span>
+	<div class="ms-auto d-flex align-items-center gap-3">
+	    <!-- User Name Display -->
+	    <span class="text-white">
+	        <i class="bi bi-person-circle me-1"></i>
+	        <c:out value="${sessionScope.userName}" />
+	    </span>
     <div class="ms-auto d-flex align-items-center gap-3">
         <!-- Notification Bell (Bootstrap Icon) -->
         <button type="button" class="btn btn-outline-light position-relative">
