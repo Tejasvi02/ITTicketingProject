@@ -1,64 +1,74 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ include file="header.jsp" %>
 <html>
 <head>
     <title>Create Ticket</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
 </head>
-<body>
-<h2>Create Ticket</h2>
+<body class="container mt-4">
+    <h2 class="mb-4">Create Ticket</h2>
 
-<form id="ticketForm" action="/user/ticket/submitTicket" method="post" enctype="multipart/form-data">
-    <label>Title:</label> 
-    <input type="text" name="title" id="title"/><br/>
+    <form id="ticketForm" action="/user/ticket/submitTicket" method="post" enctype="multipart/form-data" class="needs-validation">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title:</label>
+            <input type="text" class="form-control" name="title" id="title" required/>
+        </div>
 
-    <label>Description:</label> 
-    <textarea name="description" id="description"></textarea><br/>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
+        </div>
 
-    <label>Priority:</label>
-    <select name="priority" id="priority">
-        <option value="">-- Select Priority --</option>
-        <option value="LOW">LOW</option>
-        <option value="MEDIUM">MEDIUM</option>
-        <option value="HIGH">HIGH</option>
-    </select><br/>
+        <div class="mb-3">
+            <label for="priority" class="form-label">Priority:</label>
+            <select class="form-select" name="priority" id="priority" required>
+                <option value="">-- Select Priority --</option>
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+            </select>
+        </div>
 
-    <label>Category:</label> 
-    <input type="text" name="category" id="category"/><br/>
+        <div class="mb-3">
+            <label for="category" class="form-label">Category:</label>
+            <input type="text" class="form-control" name="category" id="category" required/>
+        </div>
 
-    <label>Attachments:</label> 
-    <input type="file" name="files" multiple onchange="displaySelectedFiles(this)"/><br/>
+        <div class="mb-3">
+            <label for="attachments" class="form-label">Attachments:</label>
+            <input type="file" class="form-control" name="files" id="attachments" multiple onchange="displaySelectedFiles(this)"/>
+        </div>
 
-    <ul id="selectedFilesList"></ul> <!-- Shows selected files -->
+        <ul id="selectedFilesList" class="list-group mb-3"></ul>
 
-    <input type="submit" value="Create Ticket"/>
-</form>
+        <button type="submit" class="btn btn-primary">Create Ticket</button>
+        <a href="/home" class="btn btn-secondary ms-2">Back to Home</a>
+    </form>
 
-<p><a href="/home">Back to Home</a></p>
+    <script>
+        function displaySelectedFiles(input) {
+            var fileList = document.getElementById("selectedFilesList");
+            fileList.innerHTML = "";
 
-<script>
-function displaySelectedFiles(input) {
-    var fileList = document.getElementById("selectedFilesList");
-    fileList.innerHTML = ""; // Clear previous list
+            for (var i = 0; i < input.files.length; i++) {
+                var listItem = document.createElement("li");
+                listItem.textContent = input.files[i].name;
+                listItem.className = "list-group-item";
+                fileList.appendChild(listItem);
+            }
+        }
 
-    for (var i = 0; i < input.files.length; i++) {
-        var listItem = document.createElement("li");
-        listItem.textContent = input.files[i].name;
-        fileList.appendChild(listItem);
-    }
-}
+        document.getElementById("ticketForm").addEventListener("submit", function(event) {
+            const title = document.getElementById("title").value.trim();
+            const description = document.getElementById("description").value.trim();
+            const priority = document.getElementById("priority").value;
+            const category = document.getElementById("category").value.trim();
 
-document.getElementById("ticketForm").addEventListener("submit", function(event) {
-    // Fetch values
-    const title = document.getElementById("title").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const priority = document.getElementById("priority").value;
-    const category = document.getElementById("category").value.trim();
-
-    // Validate
-    if (!title || !description || !priority || !category) {
-        alert("Please fill in all required fields (Title, Description, Priority, Category).");
-        event.preventDefault(); // Prevent form submission
-    }
-});
-</script>
+            if (!title || !description || !priority || !category) {
+                alert("Please fill in all required fields.");
+                event.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
