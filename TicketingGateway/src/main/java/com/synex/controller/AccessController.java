@@ -61,6 +61,8 @@ public class AccessController {
         if (request.getUserPrincipal() == null) {
             return "redirect:/login";
         }
+        String username = request.getUserPrincipal().getName();
+        request.getSession().setAttribute("userName", username);
         return "home"; // home.jsp
     }
 
