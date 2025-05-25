@@ -5,62 +5,72 @@
 <html>
 <head>
     <title>Update Ticket</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
-<h2>Update Ticket - ID: ${ticket.id}</h2>
+<body class="container mt-4">
+<h2 class="mb-4">Update Ticket - ID: ${ticket.id}</h2>
 
-<form id="updateForm" enctype="multipart/form-data">
-    <p>Title: ${ticket.title}</p>
+<form id="updateForm" enctype="multipart/form-data" class="mb-4">
+    <div class="mb-3">
+        <label class="form-label">Title:</label>
+        <p class="form-control-plaintext">${ticket.title}</p>
+    </div>
 
-    <p>Description:<br/>
-        <textarea name="description">${ticket.description}</textarea>
-    </p>
+    <div class="mb-3">
+        <label class="form-label">Description:</label>
+        <textarea name="description" class="form-control" rows="4">${ticket.description}</textarea>
+    </div>
 
-    <p>Priority:
-        <select name="priority">
+    <div class="mb-3">
+        <label class="form-label">Priority:</label>
+        <select name="priority" class="form-select">
             <option value="LOW" ${ticket.priority == 'LOW' ? 'selected' : ''}>LOW</option>
             <option value="MEDIUM" ${ticket.priority == 'MEDIUM' ? 'selected' : ''}>MEDIUM</option>
             <option value="HIGH" ${ticket.priority == 'HIGH' ? 'selected' : ''}>HIGH</option>
         </select>
-    </p>
+    </div>
 
-    <p>Category:
-        <input type="text" name="category" value="${ticket.category}" />
-    </p>
+    <div class="mb-3">
+        <label class="form-label">Category:</label>
+        <input type="text" name="category" class="form-control" value="${ticket.category}" />
+    </div>
 
-    <p>Existing Attachments:</p>
-    <ul id="attachments">
-        <c:forEach var="file" items="${ticket.fileNames}">
-            <li>${file}</li>
-        </c:forEach>
-    </ul>
+    <div class="mb-3">
+        <label class="form-label">Existing Attachments:</label>
+        <ul class="list-group">
+            <c:forEach var="file" items="${ticket.fileNames}">
+                <li class="list-group-item">${file}</li>
+            </c:forEach>
+        </ul>
+    </div>
 
-    <p>Upload more files: <input type="file" name="files" multiple /></p>
+    <div class="mb-3">
+        <label class="form-label">Upload more files:</label>
+        <input type="file" name="files" multiple class="form-control" />
+    </div>
 
-    <button type="submit">Update Ticket</button>
+    <button type="submit" class="btn btn-primary">Update Ticket</button>
+    <a href="/user/tickets" class="btn btn-secondary ms-2">← Back to My Tickets</a>
+    <a href="/home" class="btn btn-outline-secondary ms-2">← Back to Home</a>
 </form>
 
-<hr>
-
 <c:if test="${ticket.status == 'OPEN' || ticket.status == 'REOPENED' || ticket.status == 'REJECTED'}">
-    <button id="sendApprovalBtn" onclick="sendForApproval(${ticket.id})" style="display: none;">Send for Approval</button>
+    <button id="sendApprovalBtn" onclick="sendForApproval(${ticket.id})" class="btn btn-success mb-3" style="display: none;">Send for Approval</button>
 </c:if>
 
 <c:if test="${ticket.status == 'RESOLVED'}">
-    <button onclick="changeStatus(${ticket.id}, 'REOPENED')">Reopen</button>
-    <button onclick="changeStatus(${ticket.id}, 'CLOSED')">Close</button>
+    <div class="mb-3">
+        <button onclick="changeStatus(${ticket.id}, 'REOPENED')" class="btn btn-warning">Reopen</button>
+        <button onclick="changeStatus(${ticket.id}, 'CLOSED')" class="btn btn-danger ms-2">Close</button>
+    </div>
 </c:if>
 
-<hr>
+<hr/>
 
-<!-- View History Section -->
 <h3>Ticket History</h3>
-<button onclick="fetchHistory(${ticket.id})">View History</button>
-<div id="historyContainer" style="margin-top: 10px; padding: 10px; border: 1px solid #ccc;"></div>
-
-<p><a href="/user/tickets">← Back to My Tickets</a></p>
-<a href="/home" class="btn btn-secondary">← Back to Home</a>
+<button onclick="fetchHistory(${ticket.id})" class="btn btn-info mb-3">View History</button>
+<div id="historyContainer" class="mb-4 p-3 border rounded bg-light"></div>
 
 <script>
     const originalData = {
@@ -136,47 +146,37 @@
         });
     }
 
-	function fetchHistory(ticketId) {
-	    $('#historyContainer').html("Loading...");
+    function fetchHistory(ticketId) {
+        $('#historyContainer').html("Loading...");
 
-	    $.get("/user/api/ticket/" + ticketId + "/history", function (data) {
-	        console.log("✅ Data received:", data);
+        $.get("/user/api/ticket/" + ticketId + "/history", function (data) {
+            if (!Array.isArray(data) || data.length === 0) {
+                $('#historyContainer').html("<p>No history available.</p>");
+                return;
+            }
 
-	        if (!Array.isArray(data) || data.length === 0) {
-	            $('#historyContainer').html("<p>No history available.</p>");
-	            return;
-	        }
+            let html = "";
 
-	        let html = "";
+            data.forEach(entry => {
+                const action = entry.action || "-";
+                const date = entry.actionDate ? new Date(entry.actionDate).toLocaleString() : "-";
+                const by = entry.actionBy || "-";
+                const comments = entry.comments || "-";
 
-	        data.forEach(entry => {
-	            const action = entry.action || "-";
-	            const date = entry.actionDate ? new Date(entry.actionDate).toLocaleString() : "-";
-	            const by = entry.actionBy || "-";
-	            const comments = entry.comments || "-";
+                html += '' +
+                    '<div class="mb-3 p-3 border-start border-primary bg-white rounded shadow-sm">' +
+                    '<p><strong>🛠️ Action:</strong> ' + action + '</p>' +
+                    '<p><strong>📅 Date:</strong> ' + date + '</p>' +
+                    '<p><strong>👤 By:</strong> ' + by + '</p>' +
+                    '<p><strong>💬 Comments:</strong> ' + comments + '</p>' +
+                    '</div>';
+            });
 
-	            html += '' +
-	                '<div style="' +
-	                'margin-bottom: 15px;' +
-	                'padding: 15px;' +
-	                'border-left: 4px solid #007bff;' +
-	                'background: #e9f5ff;' +
-	                'border-radius: 6px;' +
-	                'box-shadow: 0 1px 3px rgba(0,0,0,0.1);' +
-	                '">' +
-	                '<p><strong>🛠️ Action:</strong> ' + action + '</p>' +
-	                '<p><strong>📅 Date:</strong> ' + date + '</p>' +
-	                '<p><strong>👤 By:</strong> ' + by + '</p>' +
-	                '<p><strong>💬 Comments:</strong> ' + comments + '</p>' +
-	                '</div>';
-	        });
-
-	        $('#historyContainer').html(html);
-	    }).fail(function () {
-	        $('#historyContainer').html("<p style='color:red;'>Failed to load history.</p>");
-	    });
-	}
-
+            $('#historyContainer').html(html);
+        }).fail(function () {
+            $('#historyContainer').html("<p class='text-danger'>Failed to load history.</p>");
+        });
+    }
 </script>
 </body>
 </html>

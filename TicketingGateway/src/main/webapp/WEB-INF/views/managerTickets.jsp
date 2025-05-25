@@ -5,31 +5,22 @@
 <html>
 <head>
     <title>Tickets to Approve</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        body {
-            padding: 20px;
-        }
-        h2 {
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-        }
-        .action-btn {
-            margin-right: 8px;
-        }
-        .back-link {
-            margin-top: 20px;
-            display: inline-block;
+        a.action-link {
+            margin-right: 10px;
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h2>Tickets to Approve</h2>
-    <div class="table-responsive">
-        <table id="ticketTable" class="table table-bordered table-striped">
+    <div class="container mt-4">
+        <h2>Tickets to Approve</h2>
+        <table id="ticketTable" class="table table-bordered table-striped table-hover mt-4">
             <thead class="thead-dark">
                 <tr>
                     <th>ID</th>
@@ -43,6 +34,8 @@
                 <!-- Populated by jQuery AJAX -->
             </tbody>
         </table>
+
+        <p><a href="/home" class="btn btn-outline-primary">← Back to Home</a></p>
     </div>
 
     <script>
@@ -58,16 +51,16 @@
                             console.warn("Invalid date for ticket:", t);
                         }
 
-                        rows += `<tr>
-                            <td>${t.id}</td>
-                            <td>${t.title}</td>
-                            <td>${t.status}</td>
-                            <td>${createdDate}</td>
-                            <td>
-                                <button class='btn btn-success btn-sm action-btn' onclick='approveTicket(${t.id})'>Approve</button>
-                                <button class='btn btn-danger btn-sm' onclick='rejectTicket(${t.id})'>Reject</button>
-                            </td>
-                        </tr>`;
+                        rows += "<tr>" +
+                            "<td>" + t.id + "</td>" +
+                            "<td>" + t.title + "</td>" +
+                            "<td>" + t.status + "</td>" +
+                            "<td>" + createdDate + "</td>" +
+                            "<td>" +
+                                "<a href='#' class='btn-sm btn-success mr-2' onclick='approveTicket(" + t.id + ")'>Approve</a>" +
+                                "<a href='#' class='btn-sm btn-danger' onclick='rejectTicket(" + t.id + ")'>Reject</a>" +
+                            "</td>" +
+                            "</tr>";
                     }
                 } else {
                     rows = `<tr><td colspan="5" class="text-center">No pending tickets to approve.</td></tr>`;
@@ -96,7 +89,5 @@
             });
         }
     </script>
-
-    <a href="/home" class="btn btn-outline-primary back-link">← Back to Home</a>
 </body>
 </html>

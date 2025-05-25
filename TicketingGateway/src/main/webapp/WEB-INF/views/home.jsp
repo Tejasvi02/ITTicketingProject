@@ -24,7 +24,7 @@
 
 	<security:authorize access="hasRole('MANAGER')">
 	    <p>Hello Manager</p>
-	    <a href="/manager/tickets"><button>Approve Tickets</button></a>
+	    <a href="/manager/tickets" class="btn btn-success">Approve Tickets</a>
 	</security:authorize>
 
 	<security:authorize access="hasRole('USER')">
