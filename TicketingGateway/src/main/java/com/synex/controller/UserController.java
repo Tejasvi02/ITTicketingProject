@@ -43,14 +43,6 @@ public class UserController {
         return ticketClient.getTicketsByCreatedBy(username);
     }
     
-//    @PostMapping("/user/api/ticket/{id}/request-approval")
-//    @ResponseBody
-//    public Map<String, Object> requestApproval(
-//            @PathVariable Long id,
-//            Principal principal) {
-//        ticketClient.sendForApproval(id, principal.getName());
-//        return Map.of("message", "Sent for approval.");
-//    }
     
     @PostMapping("/user/api/ticket/{id}/request-approval")
     @ResponseBody
@@ -110,16 +102,6 @@ public class UserController {
         }
     }
     
-//    @GetMapping("/user/api/ticket/{ticketId}/history")
-//    public ResponseEntity<List<TicketHistoryDTO>> getTicketHistory(@PathVariable Long ticketId) {
-//        try {
-//            List<TicketHistoryDTO> historyList = ticketClient.getTicketHistory(ticketId);
-//            return ResponseEntity.ok(historyList);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(500).body(Collections.emptyList());
-//        }
-//    }
     
     @GetMapping("/user/api/ticket/{ticketId}/history")
     public ResponseEntity<List<Map<String,Object>>> getTicketHistory(@PathVariable Long ticketId) {

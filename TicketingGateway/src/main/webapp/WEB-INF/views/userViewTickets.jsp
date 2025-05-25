@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page isELIgnored="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
     <title>My Tickets</title>
@@ -22,6 +23,17 @@
     </style>
 </head>
 <body>
+	<c:if test="${not empty ticketCreated}">
+	    <script>
+	        alert("Ticket created successfully!");
+	    </script>
+	</c:if>
+	<c:if test="${not empty error}">
+	    <script>
+	        alert("${error}");
+	    </script>
+	</c:if>
+
     <h2>My Tickets</h2>
     <table id="ticketTable">
         <thead>
