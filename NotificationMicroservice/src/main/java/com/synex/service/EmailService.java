@@ -11,12 +11,12 @@ public class EmailService {
     @Autowired
     private JavaMailSender emailSender;
 
-    public void sendTicketCreationEmail(String toEmail, String ticketTitle, String ticketId) {
+    public void sendEmail(String toEmail, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Ticket Created: " + ticketTitle);
-        message.setText("Your ticket with ID " + ticketId + " has been successfully created. We will get back to you soon.");
-        message.setFrom("your_email@gmail.com");
+        message.setSubject(subject);
+        message.setText(body);
+        message.setFrom("your_email@gmail.com");  // Use your sender email
 
         emailSender.send(message);
     }

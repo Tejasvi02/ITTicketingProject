@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.synex.component.NotificationClient;
 import com.synex.component.TicketClient;
 import com.synex.model.TicketForm;
 import com.synex.service.EmployeeRoleService;
@@ -31,6 +32,8 @@ public class TicketGatewayController {
     @Autowired
     private TicketClient ticketClient;
     
+    @Autowired
+    private NotificationClient notificationClient;
 
     @Autowired
     private EmployeeRoleService employeeRoleService;
@@ -42,36 +45,67 @@ public class TicketGatewayController {
     }
     
 
+//    @PostMapping("/submitTicket")
+//    public String submitTicket(@ModelAttribute TicketForm form,
+//                               @RequestParam("files") MultipartFile[] files,
+//                               RedirectAttributes redirectAttributes) {
+//        try {
+//            // Get logged-in user's email
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            String currentUserEmail = authentication.getName();
+//
+//            // Set metadata
+//            form.setCreatedBy(currentUserEmail);
+//            form.setAssignedTo(currentUserEmail);
+//
+//            List<MultipartFile> fileList = Arrays.asList(files);
+//            ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
+//
+//            // OPTIONAL: Deserialize and do something with response
+//            // ObjectMapper mapper = new ObjectMapper();
+//            // Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
+//
+//            // Add flash attribute to show success alert
+//            redirectAttributes.addFlashAttribute("ticketCreated", true);
+//            return "redirect:/user/tickets";
+//        } catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("error", "Error submitting ticket: " + e.getMessage());
+//            return "redirect:/user/ticket/form";
+//        }
+//    }
+
     @PostMapping("/submitTicket")
     public String submitTicket(@ModelAttribute TicketForm form,
                                @RequestParam("files") MultipartFile[] files,
                                RedirectAttributes redirectAttributes) {
         try {
-            // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUserEmail = authentication.getName();
 
-            // Set metadata
+            // Use assignedTo email for notification later
             form.setCreatedBy(currentUserEmail);
-            form.setAssignedTo(currentUserEmail);
+            form.setAssignedTo(currentUserEmail); // or set to manager's email
 
             List<MultipartFile> fileList = Arrays.asList(files);
             ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
 
-            // OPTIONAL: Deserialize and do something with response
-            // ObjectMapper mapper = new ObjectMapper();
-            // Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
+            // Compose email subject and body
+            String subject = "Ticket Created Successfully: " + form.getTitle();
+            String body = "Hi,\n\nYour ticket \"" + form.getTitle() + "\" has been created with priority: "
+                          + form.getPriority() + " in category: " + form.getCategory() + ".\n\nThank you,\nSupport Team";
 
-            // Add flash attribute to show success alert
+            // Send email to assignedTo (user who created or assigned ticket)
+            notificationClient.sendTicketCreationEmail(form.getAssignedTo(), subject, body);
+
             redirectAttributes.addFlashAttribute("ticketCreated", true);
             return "redirect:/user/tickets";
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error submitting ticket: " + e.getMessage());
             return "redirect:/user/ticket/form";
         }
     }
 
-    
     
     @GetMapping("/viewTickets")
     @ResponseBody
