@@ -95,11 +95,12 @@ public class TicketController {
     }
 
     @PostMapping("/ticket/{id}/resolve")
-    public ResponseEntity<?> resolveTicket(@PathVariable Long id) {
-        ticketService.resolveTicket(id);
+    public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String comment = body.get("comment");
+        ticketService.resolveTicket(id, comment);
         return ResponseEntity.ok(Map.of("message", "Ticket resolved successfully."));
     }
-	
+
     
   //Testing for gateway and microservice connection
   	@RequestMapping(value = "/testGet/{data}",method = RequestMethod.GET)

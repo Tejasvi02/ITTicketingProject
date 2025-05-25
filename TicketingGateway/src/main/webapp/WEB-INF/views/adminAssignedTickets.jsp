@@ -44,7 +44,9 @@
                             "<td>" + t.status + "</td>" +
                             "<td>" + t.assignedTo + "</td>" +
 							"<td>" +
-							       "<a href='#' onclick='resolveTicket(" + t.id + ")'>Resolve</a>" +
+								"<input type='text' id='comment_" + t.id + "' placeholder='Resolution comment' style='width: 150px;' />" +
+								"<br/>" +
+								"<a href='#' onclick='resolveTicket(" + t.id + ")'>Resolve</a>" +
 							   "</td>" +
                             "</tr>";
                     }
@@ -57,13 +59,27 @@
             });
         });
 		function resolveTicket(ticketId) {
-		    $.post("/admin/api/ticket/" + ticketId + "/resolve", function (response) {
-		        alert(response.message);
-		        location.reload();
-		    }).fail(function () {
-		        alert("Failed to resolve ticket.");
+		    let comment = $("#comment_" + ticketId).val();
+		    if (!comment) {
+		        alert("Please enter a resolution comment.");
+		        return;
+		    }
+
+		    $.ajax({
+		        url: "/admin/api/ticket/" + ticketId + "/resolve",
+		        type: "POST",
+		        contentType: "application/json",
+		        data: JSON.stringify({ comment: comment }),
+		        success: function(response) {
+		            alert(response.message);
+		            location.reload();
+		        },
+		        error: function() {
+		            alert("Failed to resolve ticket.");
+		        }
 		    });
 		}
+
     </script>
 	<p><a href="/home">← Back to Home</a></p>
 </body>

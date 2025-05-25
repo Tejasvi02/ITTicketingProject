@@ -107,7 +107,7 @@ public class TicketService {
         return updated;
     }
     
-    public Ticket resolveTicket(Long ticketId) {
+    public Ticket resolveTicket(Long ticketId, String comment) {
         Ticket ticket = ticketRepo.findById(ticketId)
             .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -116,12 +116,14 @@ public class TicketService {
         }
 
         ticket.setStatus("RESOLVED");
-        ticket.setAssignedTo(ticket.getCreatedBy()); // Reassign to creator
+        ticket.setAssignedTo(ticket.getCreatedBy());
         Ticket updated = ticketRepo.save(ticket);
-
-        logHistory(updated, "RESOLVED", "Ticket resolved by admin","admin@gmail.com");
+        
+        String fullComment = "Resolved by Admin - Resolution comments: " + comment;
+        logHistory(updated, "RESOLVED", fullComment, "admin@gmail.com");
         return updated;
     }
+
     
     public Ticket reopenTicket(Long ticketId) {
         Ticket ticket = ticketRepo.findById(ticketId)

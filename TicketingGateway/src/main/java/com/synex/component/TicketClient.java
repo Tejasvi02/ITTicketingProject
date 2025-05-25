@@ -156,18 +156,6 @@ public class TicketClient {
     }
     
     
-//    public void sendForApproval(Long ticketId, String username) {
-//        // 1) Direct lookup of manager email (no HTTP)
-//        String managerEmail = employeeRoleService.getManagerEmailForUser(username);
-//        RestTemplate restTemplate = new RestTemplate();
-//        // 2) Forward to ticket microservice
-//        String url = requestApprovalUrl
-//                   + ticketId
-//                   + "/request-approval?managerEmail="
-//                   + managerEmail;
-//        restTemplate.postForEntity(url, null, Void.class);
-//    }
-    
     public void sendForApproval(Long ticketId, String username) {
         String managerEmail = employeeRoleService.getManagerEmailForUser(username);
         RestTemplate restTemplate = new RestTemplate();
@@ -206,11 +194,13 @@ public class TicketClient {
         restTemplate.postForEntity(url, null, Void.class);
     }
     
-    public void resolveTicket(Long ticketId) {
+    public void resolveTicket(Long ticketId, String comment) {
         String url = baseTicketUrl + ticketId + "/resolve";
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.postForEntity(url, null, Void.class);
+        Map<String, String> payload = Map.of("comment", comment);
+        restTemplate.postForEntity(url, payload, Void.class);
     }
+
     
 
     public void reopenTicket(Long ticketId) {

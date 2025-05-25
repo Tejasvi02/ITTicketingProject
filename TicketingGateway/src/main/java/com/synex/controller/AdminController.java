@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +43,12 @@ public class AdminController {
     
     @PostMapping("/admin/api/ticket/{id}/resolve")
     @ResponseBody
-    public ResponseEntity<?> resolveTicket(@PathVariable Long id) {
-        ticketClient.resolveTicket(id);
+    public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String comment = body.get("comment");
+        ticketClient.resolveTicket(id, comment);
         return ResponseEntity.ok(Map.of("message", "Ticket resolved."));
     }
+
     
  // Show JSP for assigned tickets
     @GetMapping("/admin/assigned-tickets")
