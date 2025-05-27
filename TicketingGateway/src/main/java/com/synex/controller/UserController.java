@@ -20,99 +20,118 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.synex.component.NotificationClient;
 import com.synex.component.TicketClient;
 import com.synex.model.TicketForm;
 import com.synex.model.TicketHistoryDTO;
+import com.synex.service.EmployeeRoleService;
 
 @Controller
 public class UserController {
 
-    @Autowired
-    private TicketClient ticketClient;
+	@Autowired
+	private TicketClient ticketClient;
+	
+	@Autowired
+	private NotificationClient notificationClient;
 
-    @GetMapping("/user/tickets")
-    public String userViewTicketsPage() {
-        return "userViewTickets"; // your JSP
-    }
+	@Autowired
+	private EmployeeRoleService employeeRoleService;
 
-    @GetMapping("/user/api/tickets")
-    @ResponseBody
-    public List<Map<String, Object>> getUserTickets(Principal principal) {
-        String username = principal.getName();
-        //System.out.println("Fetching tickets for: " + username); 
-        return ticketClient.getTicketsByCreatedBy(username);
-    }
-    
-    
-    @PostMapping("/user/api/ticket/{id}/request-approval")
-    @ResponseBody
-    public ResponseEntity<?> requestApproval(@PathVariable Long id, Principal principal) {
-        try {
-            String userEmail = principal.getName(); // only send logged-in user
+	@GetMapping("/user/tickets")
+	public String userViewTicketsPage() {
+		return "userViewTickets"; // your JSP
+	}
 
-            // TicketClient handles fetching manager and calling microservice
-            ticketClient.sendForApproval(id, userEmail);
+	@GetMapping("/user/api/tickets")
+	@ResponseBody
+	public List<Map<String, Object>> getUserTickets(Principal principal) {
+		String username = principal.getName();
+		// System.out.println("Fetching tickets for: " + username);
+		return ticketClient.getTicketsByCreatedBy(username);
+	}
 
-            return ResponseEntity.ok(Map.of("message", "Sent for approval."));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(Map.of("error", "Failed to send for approval"));
-        }
-    }
-    
-    @PostMapping("/user/api/ticket/{id}/reopen")
-    @ResponseBody
-    public ResponseEntity<?> reopenTicket(@PathVariable Long id) {
-        ticketClient.reopenTicket(id);
-        return ResponseEntity.ok(Map.of("message", "Ticket reopened."));
-    }
+	@PostMapping("/user/api/ticket/{id}/request-approval")
+	@ResponseBody
+	public ResponseEntity<?> requestApproval(@PathVariable Long id, Principal principal) {
+	    try {
+	        String userEmail = principal.getName();
 
-    @PostMapping("/user/api/ticket/{id}/close")
-    @ResponseBody
-    public ResponseEntity<?> closeTicket(@PathVariable Long id) {
-        ticketClient.closeTicket(id);
-        return ResponseEntity.ok(Map.of("message", "Ticket closed."));
-    }
+	        // Step 1: Assign ticket to manager via ticketClient
+	        ticketClient.sendForApproval(id, userEmail);
 
-    @GetMapping("/user/ticket/{id}/edit")
-    public String editTicketPage(@PathVariable Long id, Model model) {
-        Map<String, Object> ticket = ticketClient.getTicketById(id); // use REST call
-        Object filePathsObj = ticket.get("fileAttachmentPaths"); 
-        if (filePathsObj != null) {
-            ticket.put("fileNames", filePathsObj);
-        } else {
-            ticket.put("fileNames", new ArrayList<String>());
-        }
-        model.addAttribute("ticket", ticket);
-        return "userUpdateTicket"; // JSP page
-    }
-    
-    @PostMapping("/user/api/ticket/{id}/update")
-    public ResponseEntity<?> updateTicket(@PathVariable Long id,
-                                          @ModelAttribute TicketForm form,
-                                          @RequestParam("files") List<MultipartFile> newFiles) {
-        try {
-            ticketClient.updateTicketWithFiles(id, form, newFiles);
-            return ResponseEntity.ok().body(Map.of("message", "Updated"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(Map.of("error", "Update failed", "details", e.getMessage()));
-        }
-    }
-    
-    
-    @GetMapping("/user/api/ticket/{ticketId}/history")
-    public ResponseEntity<List<Map<String,Object>>> getTicketHistory(@PathVariable Long ticketId) {
-        try {
-            List<Map<String,Object>> history = ticketClient.getTicketHistory(ticketId);
-            return ResponseEntity.ok(history);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Collections.emptyList());
-        }
-    }
+	        // Step 2: Get manager email
+	        String managerEmail = employeeRoleService.getManagerEmailForUser(userEmail);
 
+	        // Step 3: Prepare and send email notification
+	        String subject = "Approval Request: Ticket #" + id;
+	        String body = "Dear Manager,\n\n"
+	                    + "User " + userEmail + " has requested your approval for Ticket #" + id + ".\n"
+	                    + "Please review and take action in the ticketing system.\n\n"
+	                    //+ "Link: http://localhost:8282/manager/tickets" + id + "\n\n" furture scope id and displaying that ticket
+	                    + "Link: http://localhost:8282/login \n\n"
+	                    + "Regards,\nTicketing System";
+
+	        notificationClient.sendTicketCreationEmail(managerEmail, subject, body);
+
+	        return ResponseEntity.ok(Map.of("message", "Sent for approval and notified manager."));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body(Map.of("error", "Failed to send for approval"));
+	    }
+	}
+
+
+	@PostMapping("/user/api/ticket/{id}/reopen")
+	@ResponseBody
+	public ResponseEntity<?> reopenTicket(@PathVariable Long id) {
+		ticketClient.reopenTicket(id);
+		return ResponseEntity.ok(Map.of("message", "Ticket reopened."));
+	}
+
+	@PostMapping("/user/api/ticket/{id}/close")
+	@ResponseBody
+	public ResponseEntity<?> closeTicket(@PathVariable Long id) {
+		ticketClient.closeTicket(id);
+		return ResponseEntity.ok(Map.of("message", "Ticket closed."));
+	}
+
+	@GetMapping("/user/ticket/{id}/edit")
+	public String editTicketPage(@PathVariable Long id, Model model) {
+		Map<String, Object> ticket = ticketClient.getTicketById(id); // use REST call
+		Object filePathsObj = ticket.get("fileAttachmentPaths");
+		if (filePathsObj != null) {
+			ticket.put("fileNames", filePathsObj);
+		} else {
+			ticket.put("fileNames", new ArrayList<String>());
+		}
+		model.addAttribute("ticket", ticket);
+		return "userUpdateTicket"; // JSP page
+	}
+
+	@PostMapping("/user/api/ticket/{id}/update")
+	public ResponseEntity<?> updateTicket(@PathVariable Long id, @ModelAttribute TicketForm form,
+			@RequestParam("files") List<MultipartFile> newFiles) {
+		try {
+			ticketClient.updateTicketWithFiles(id, form, newFiles);
+			return ResponseEntity.ok().body(Map.of("message", "Updated"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Update failed", "details", e.getMessage()));
+		}
+	}
+
+	@GetMapping("/user/api/ticket/{ticketId}/history")
+	public ResponseEntity<List<Map<String, Object>>> getTicketHistory(@PathVariable Long ticketId) {
+		try {
+			List<Map<String, Object>> history = ticketClient.getTicketHistory(ticketId);
+			return ResponseEntity.ok(history);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(500).body(Collections.emptyList());
+		}
+	}
 
 }

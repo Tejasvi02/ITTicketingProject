@@ -158,6 +158,7 @@ public class TicketClient {
     
     public void sendForApproval(Long ticketId, String username) {
         String managerEmail = employeeRoleService.getManagerEmailForUser(username);
+
         RestTemplate restTemplate = new RestTemplate();
         String url = requestApprovalUrl
                    + ticketId
@@ -165,6 +166,7 @@ public class TicketClient {
                    + managerEmail
                    + "&actionBy="
                    + username;
+
         restTemplate.postForEntity(url, null, Void.class);
     }
 

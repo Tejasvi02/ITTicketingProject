@@ -37,7 +37,6 @@
 
         <p><a href="/home" class="btn btn-outline-primary">← Back to Home</a></p>
     </div>
-
     <script>
         $(document).ready(function () {
             $.get("/manager/api/tickets", function (tickets) {

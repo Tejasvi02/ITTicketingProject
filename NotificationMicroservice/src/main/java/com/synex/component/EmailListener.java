@@ -21,7 +21,7 @@ public class EmailListener {
             EmailMessage email = objectMapper.readValue(messageJson, EmailMessage.class);
 
             System.out.println("Received email to: " + email.getTo());
-            emailService.sendTicketCreationEmail(email.getTo(), email.getSubject(), email.getBody());
+            emailService.sendEmail(email.getTo(), email.getSubject(), email.getBody());
 
         } catch (Exception e) {
             System.err.println("Failed to parse or send email: " + e.getMessage());

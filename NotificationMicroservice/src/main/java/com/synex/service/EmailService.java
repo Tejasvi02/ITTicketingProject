@@ -21,7 +21,7 @@ public class EmailService {
 //        emailSender.send(message);
 //    }
     
-    public void sendTicketCreationEmail(String to, String subject, String body) {
+    public void sendEmail(String to, String subject, String body) {
     	System.out.println("Sending email to: " + to);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
