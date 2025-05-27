@@ -11,13 +11,23 @@ public class EmailService {
     @Autowired
     private JavaMailSender emailSender;
 
-    public void sendEmail(String toEmail, String subject, String body) {
+//    public void sendEmail(String toEmail, String subject, String body) {
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(toEmail);
+//        message.setSubject(subject);
+//        message.setText(body);
+//        message.setFrom("your_email@gmail.com");  // Use your sender email
+//
+//        emailSender.send(message);
+//    }
+    
+    public void sendTicketCreationEmail(String to, String subject, String body) {
+    	System.out.println("Sending email to: " + to);
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
+        message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        message.setFrom("your_email@gmail.com");  // Use your sender email
-
+        message.setFrom("your_email@gmail.com");
         emailSender.send(message);
     }
 }

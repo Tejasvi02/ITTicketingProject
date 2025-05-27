@@ -19,13 +19,13 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
-    @PostMapping("/ticketCreated")
-    public String notifyTicketCreated(@RequestBody Map<String, String> payload) {
-        String to = payload.get("to");
-        String subject = payload.get("subject");
-        String body = payload.get("body");
-
-        emailService.sendEmail(to, subject, body);
-        return "Email sent to " + to;
-    }
+//    @PostMapping("/ticketCreated")
+//    public String notifyTicketCreated(@RequestBody Map<String, String> payload) {
+//        String to = payload.get("to");
+//        String subject = payload.get("subject");
+//        String body = payload.get("body");
+//
+//        emailService.sendTicketCreationEmail(to, subject, body);
+//        return "Email sent to " + to;
+//    }
 }

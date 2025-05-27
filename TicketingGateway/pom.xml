@@ -44,6 +44,12 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<!-- Activemq dependency -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-activemq</artifactId>
+		    <version>3.1.0</version>
+  		</dependency>
 		<!-- Oracle strater dependency -->
 		<dependency>
 			<groupId>com.oracle.database.jdbc</groupId>

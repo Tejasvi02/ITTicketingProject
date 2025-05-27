@@ -82,22 +82,30 @@ public class TicketGatewayController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUserEmail = authentication.getName();
 
-            // Use assignedTo email for notification later
+            // Set ticket creator and assigned user
             form.setCreatedBy(currentUserEmail);
-            form.setAssignedTo(currentUserEmail); // or set to manager's email
+            form.setAssignedTo(currentUserEmail); // Or use manager's email if needed
 
             List<MultipartFile> fileList = Arrays.asList(files);
             ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
 
-            // Compose email subject and body
+            // Set success message immediately
+            redirectAttributes.addFlashAttribute("ticketCreated", true);
+
+            // Compose email details
             String subject = "Ticket Created Successfully: " + form.getTitle();
             String body = "Hi,\n\nYour ticket \"" + form.getTitle() + "\" has been created with priority: "
                           + form.getPriority() + " in category: " + form.getCategory() + ".\n\nThank you,\nSupport Team";
 
-            // Send email to assignedTo (user who created or assigned ticket)
-            notificationClient.sendTicketCreationEmail(form.getAssignedTo(), subject, body);
+            // Try to send email notification separately
+            try {
+                System.out.println("Sending ticket email to: " + form.getAssignedTo());
+                notificationClient.sendTicketCreationEmail(form.getAssignedTo(), subject, body);
+            } catch (Exception ex) {
+                System.err.println("Failed to send email notification: " + ex.getMessage());
+                // You may log this instead of printing in production
+            }
 
-            redirectAttributes.addFlashAttribute("ticketCreated", true);
             return "redirect:/user/tickets";
 
         } catch (Exception e) {
@@ -105,6 +113,7 @@ public class TicketGatewayController {
             return "redirect:/user/ticket/form";
         }
     }
+
 
     
     @GetMapping("/viewTickets")
