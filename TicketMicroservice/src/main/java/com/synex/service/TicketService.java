@@ -89,8 +89,8 @@ public class TicketService {
         return updated;
     }
 
-    // — New reject method —
-    public Ticket rejectTicket(Long ticketId, String managerEmail) {
+
+    public Ticket rejectTicket(Long ticketId, String managerEmail, String reason) {
         Ticket ticket = ticketRepo.findById(ticketId)
             .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -103,9 +103,14 @@ public class TicketService {
         ticket.setAssignedTo(ticket.getCreatedBy());
         Ticket updated = ticketRepo.save(ticket);
 
-        logHistory(updated, "REJECTED", "Ticket rejected by manager: " + managerEmail,managerEmail);
+        String fullComment = "Ticket rejected by manager: " + managerEmail + 
+                             (reason != null && !reason.isBlank() ? " - Reason: " + reason : "");
+
+        logHistory(updated, "REJECTED", fullComment, managerEmail);
+
         return updated;
     }
+
     
     public Ticket resolveTicket(Long ticketId, String comment) {
         Ticket ticket = ticketRepo.findById(ticketId)

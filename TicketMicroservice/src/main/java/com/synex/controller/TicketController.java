@@ -72,13 +72,13 @@ public class TicketController {
     }
     
     @PostMapping("/ticket/{id}/reject")
-    public ResponseEntity<?> rejectTicket(
-        @PathVariable Long id,
-        @RequestParam String managerEmail
-    ) {
-        ticketService.rejectTicket(id, managerEmail);
-        return ResponseEntity.ok(Map.of("message","Ticket rejected."));
+    public ResponseEntity<?> rejectTicket(@PathVariable Long id,
+                                          @RequestParam String managerEmail,
+                                          @RequestParam(required = false) String reason) {
+        ticketService.rejectTicket(id, managerEmail, reason);
+        return ResponseEntity.ok(Map.of("message", "Ticket rejected successfully."));
     }
+
 
     
     @GetMapping("/createdby/{createdBy}")

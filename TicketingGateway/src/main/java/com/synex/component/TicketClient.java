@@ -190,9 +190,9 @@ public class TicketClient {
 
         restTemplate.postForEntity(url, null, Void.class);
     }
-    public void rejectTicket(Long ticketId, String managerEmail) {
-    	RestTemplate restTemplate = new RestTemplate();
-        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail;
+    public void rejectTicket(Long ticketId, String managerEmail, String reason) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail + "&reason=" + URLEncoder.encode(reason, StandardCharsets.UTF_8);
         restTemplate.postForEntity(url, null, Void.class);
     }
     

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
@@ -48,8 +49,10 @@ public class ManagerController {
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/api/ticket/{id}/reject")
     @ResponseBody
-    public ResponseEntity<?> rejectTicket(@PathVariable Long id, Principal principal) {
-        ticketClient.rejectTicket(id, principal.getName());
-        return ResponseEntity.ok(Map.of("message", "Ticket rejected."));
+    public ResponseEntity<?> rejectTicket(@PathVariable Long id, 
+            @RequestParam String reason,
+            Principal principal) {
+    	ticketClient.rejectTicket(id, principal.getName(), reason);
+    	return ResponseEntity.ok(Map.of("message", "Ticket rejected."));
     }
 }

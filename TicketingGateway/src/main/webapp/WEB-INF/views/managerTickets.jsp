@@ -6,7 +6,9 @@
 <head>
     <title>Tickets to Approve</title>
     <!-- Bootstrap CSS CDN -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         a.action-link {
@@ -37,6 +39,33 @@
 
         <p><a href="/home" class="btn btn-outline-primary">← Back to Home</a></p>
     </div>
+	<!-- Rejection Reason Modal -->
+	<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <form id="rejectForm">
+	        <div class="modal-header">
+	          <h5 class="modal-title" id="rejectModalLabel">Reject Ticket</h5>
+			  <button type="button" class="close" onclick="closeRejectModal()" aria-label="Close">
+			    <span aria-hidden="true">&times;</span>
+	          </button>
+	        </div>
+	        <div class="modal-body">
+	          <input type="hidden" id="rejectTicketId" />
+	          <div class="form-group">
+	            <label for="rejectionReason">Reason for Rejection</label>
+	            <textarea class="form-control" id="rejectionReason" rows="3" required></textarea>
+	          </div>
+	        </div>
+	        <div class="modal-footer">
+	          <button type="submit" class="btn btn-danger">Reject</button>
+	          <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Cancel</button>
+	        </div>
+	      </form>
+	    </div>
+	  </div>
+	</div>
+
     <script>
         $(document).ready(function () {
             $.get("/manager/api/tickets", function (tickets) {
@@ -79,14 +108,35 @@
             });
         }
 
-        function rejectTicket(ticketId) {
-            $.post("/manager/api/ticket/" + ticketId + "/reject", function (response) {
-                alert(response.message);
-                location.reload();
-            }).fail(function () {
-                alert("Failed to reject ticket.");
-            });
-        }
+		function rejectTicket(ticketId) {
+		    $('#rejectTicketId').val(ticketId);
+		    $('#rejectionReason').val('');
+		    $('#rejectModal').modal('show');
+		}
+
+		$('#rejectForm').submit(function(e) {
+		    e.preventDefault();
+		    const ticketId = $('#rejectTicketId').val();
+		    const reason = $('#rejectionReason').val().trim();
+
+		    if (!reason) {
+		        alert("Please provide a reason for rejection.");
+		        return;
+		    }
+
+		    $.post("/manager/api/ticket/" + ticketId + "/reject", { reason: reason }, function (response) {
+		        alert(response.message);
+		        $('#rejectModal').modal('hide');
+		        location.reload();
+		    }).fail(function () {
+		        alert("Failed to reject ticket.");
+		    });
+		});
+		
+		function closeRejectModal() {
+		    $('#rejectModal').modal('hide');
+		}
+
     </script>
 </body>
 </html>
