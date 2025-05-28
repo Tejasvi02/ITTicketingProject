@@ -37,7 +37,6 @@ public class TicketController {
     public Ticket createTicket(@RequestBody Ticket ticket) {
         return ticketService.createTicket(ticket);
     }
-//    
     
     @GetMapping("/ticket/assigned")
     public ResponseEntity<List<Ticket>> getTicketsAssignedToAdmin() {

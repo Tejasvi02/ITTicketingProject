@@ -32,21 +32,17 @@ public class NotificationClient {
 		    }
 		}
 	 
-	    public void sendResolvedTicketWithPdf(String to, String subject, String body, String attachmentPath) {
-	        try {
-	            EmailMessage email = new EmailMessage();
-	            email.setTo(to);
-	            email.setSubject(subject);
-	            email.setBody(body);
-	            email.setAttachmentPath(attachmentPath);
+	 public void sendResolvedTicketNotification(Map<String, Object> ticketData) {
+		    try {
+		        Map<String, Object> message = new HashMap<>();
+		        message.put("type", "ticket_resolved");
+		        message.put("ticket", ticketData);
 
-	            ObjectMapper objectMapper = new ObjectMapper();
-	            String json = objectMapper.writeValueAsString(email);
-
-	            jmsTemplate.convertAndSend("ticket.email.queue", json);
-	            System.out.println("Sent resolved ticket email with PDF to: " + to);
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-	    }
+		        String json = new ObjectMapper().writeValueAsString(message);
+		        jmsTemplate.convertAndSend("ticket.email.queue", json);
+		        System.out.println("Sent ticket resolved data to notification service");
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    }
+		}
 }

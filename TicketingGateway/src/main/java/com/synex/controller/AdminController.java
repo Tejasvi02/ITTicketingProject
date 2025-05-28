@@ -67,20 +67,10 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String comment = body.get("comment");
-
-        // Call Ticket microservice to resolve the ticket and get the updated data
         Map<String, Object> ticket = ticketClient.resolveTicket(id, comment);
 
-        // Generate PDF and get the file path
-        String filePath = pdfService.createResolutionPdf(ticket);
-
-        // Send email with attachment using JMS (centralized via NotificationClient)
-        notificationClient.sendResolvedTicketWithPdf(
-            ticket.get("createdBy").toString(),
-            "Your Ticket #" + ticket.get("id") + " has been Resolved",
-            "Dear user,\n\nYour ticket has been resolved. Please find the resolution PDF attached.\n\nRegards,\nSupport Team",
-            filePath
-        );
+        // Send full ticket data for PDF generation & email
+        notificationClient.sendResolvedTicketNotification(ticket);
 
         return ResponseEntity.ok(Map.of("message", "Ticket resolved and email sent."));
     }
