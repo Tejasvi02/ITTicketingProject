@@ -45,6 +45,9 @@ public class TicketClient {
 
     @Autowired
     private EmployeeRoleService employeeRoleService;
+    
+    @Autowired
+    private NotificationClient notificationClient;
 
 	public String testGetClient(String data) {		
 		RestTemplate restTemplate = new RestTemplate();
@@ -176,26 +179,81 @@ public class TicketClient {
     }
 
     
-    public void approveTicket(Long ticketId) {
+//    public void approveTicket(Long ticketId) {
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        // Hard‑coded admin email
+//        String adminEmail = "admin@gmail.com";
+//
+//        // Send raw email without encoding
+//        String url = baseTicketUrl 
+//                   + ticketId 
+//                   + "/approve?adminEmail=" 
+//                   + adminEmail;
+//
+//        restTemplate.postForEntity(url, null, Void.class);
+//    }
+    
+    public void approveTicket(Long ticketId, String adminEmail) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // Hard‑coded admin email
-        String adminEmail = "admin@gmail.com";
+        String url = baseTicketUrl + ticketId + "/approve?adminEmail=" + adminEmail;
 
-        // Send raw email without encoding
-        String url = baseTicketUrl 
-                   + ticketId 
-                   + "/approve?adminEmail=" 
-                   + adminEmail;
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, null, Map.class);
 
-        restTemplate.postForEntity(url, null, Void.class);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            Map<String, Object> ticketData = response.getBody();
+            Object id = ticketData.get("id");
+            String createdBy = (String) ticketData.get("createdBy");
+
+            String subjectToAdmin = "Ticket Approved: ID " + id;
+            String bodyToAdmin = "A ticket has been approved and assigned to you.";
+
+            String subjectToUser = "Your Ticket has been Approved";
+            String bodyToUser = "Your ticket (ID " + id + ") has been approved by your manager and assigned to the admin.";
+
+            // ✅ Send correctly: to, subject, body
+            notificationClient.sendTicketCreationEmail(adminEmail, subjectToAdmin, bodyToAdmin);
+            notificationClient.sendTicketCreationEmail(createdBy, subjectToUser, bodyToUser);
+        } else {
+            throw new RuntimeException("Ticket approval failed");
+        }
     }
+
+    
+//    public void rejectTicket(Long ticketId, String managerEmail, String reason) {
+//        RestTemplate restTemplate = new RestTemplate();
+//        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail + "&reason=" + URLEncoder.encode(reason, StandardCharsets.UTF_8);
+//        restTemplate.postForEntity(url, null, Void.class);
+//    }
+//    
+    
     public void rejectTicket(Long ticketId, String managerEmail, String reason) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail + "&reason=" + URLEncoder.encode(reason, StandardCharsets.UTF_8);
-        restTemplate.postForEntity(url, null, Void.class);
+
+        String encodedReason = URLEncoder.encode(reason, StandardCharsets.UTF_8);
+        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail + "&reason=" + encodedReason;
+
+        // Deserialize response into a Map instead of Ticket class
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, null, Map.class);
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            Map<String, Object> ticketData = response.getBody();
+            Object id = ticketData.get("id");
+            String createdBy = (String) ticketData.get("createdBy");
+
+            // Send rejection email to ticket creator
+            String subject = "Your Ticket has been Rejected";
+            String body = "Your ticket (ID " + id + ") was rejected by " + managerEmail +
+                          ".\n\nReason: " + reason;
+
+            notificationClient.sendTicketCreationEmail(createdBy, subject, body);
+        } else {
+            throw new RuntimeException("Failed to reject ticket.");
+        }
     }
-    
+
+
     public void resolveTicket(Long ticketId, String comment) {
         String url = baseTicketUrl + ticketId + "/resolve";
         RestTemplate restTemplate = new RestTemplate();

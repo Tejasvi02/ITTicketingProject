@@ -72,13 +72,14 @@ public class TicketController {
     }
     
     @PostMapping("/ticket/{id}/reject")
-    public ResponseEntity<?> rejectTicket(@PathVariable Long id,
-                                          @RequestParam String managerEmail,
-                                          @RequestParam(required = false) String reason) {
-        ticketService.rejectTicket(id, managerEmail, reason);
-        return ResponseEntity.ok(Map.of("message", "Ticket rejected successfully."));
+    public ResponseEntity<Ticket> rejectTicket(
+        @PathVariable Long id,
+        @RequestParam String managerEmail,
+        @RequestParam String reason
+    ) {
+        Ticket ticket = ticketService.rejectTicket(id, managerEmail, reason);
+        return ResponseEntity.ok(ticket);
     }
-
 
     
     @GetMapping("/createdby/{createdBy}")
@@ -120,15 +121,25 @@ public class TicketController {
   	    return ResponseEntity.ok(ticketService.getTicketsAssignedToManager(managerEmail));
   	}
 
-    @PostMapping("/ticket/{id}/approve")
-    public ResponseEntity<?> approveTicket(
-        @PathVariable Long id,
-        @RequestParam String adminEmail    // injected by Gateway
-    ) {
-        ticketService.approveTicket(id, adminEmail);
-        return ResponseEntity.ok(Map.of("message","Ticket approved."));
-    }
-    
+//    @PostMapping("/ticket/{id}/approve")
+//    public ResponseEntity<?> approveTicket(
+//        @PathVariable Long id,
+//        @RequestParam String adminEmail    // injected by Gateway
+//    ) {
+//        ticketService.approveTicket(id, adminEmail);
+//        return ResponseEntity.ok(Map.of("message","Ticket approved."));
+//    }
+//    
+  	@PostMapping("/ticket/{id}/approve")
+  	public ResponseEntity<Ticket> approveTicket(
+  	    @PathVariable Long id,
+  	    @RequestParam String adminEmail // injected by Gateway
+  	) {
+  	    Ticket ticket = ticketService.approveTicket(id, adminEmail);
+  	    return ResponseEntity.ok(ticket);
+  	}
+
+  
     @PostMapping("/ticket/{id}/reopen")
     public ResponseEntity<?> reopenTicket(@PathVariable Long id) {
         ticketService.reopenTicket(id);

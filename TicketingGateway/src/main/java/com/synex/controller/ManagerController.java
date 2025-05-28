@@ -38,21 +38,24 @@ public class ManagerController {
         return ticketClient.getTicketsToApprove(principal.getName());
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/api/ticket/{id}/approve")
+    @PreAuthorize("hasRole('MANAGER')")
     @ResponseBody
-    public ResponseEntity<?> approveTicket(@PathVariable Long id) {
-        ticketClient.approveTicket(id);
+    public ResponseEntity<?> approveTicket(@PathVariable Long id, Principal principal) {
+        String adminEmail = "tejasvijava555+admintkt@gmail.com"; // Replace with a dynamic lookup if needed
+        ticketClient.approveTicket(id, adminEmail); // No need to send managerEmail unless used
         return ResponseEntity.ok(Map.of("message", "Ticket approved."));
     }
     
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/api/ticket/{id}/reject")
     @ResponseBody
-    public ResponseEntity<?> rejectTicket(@PathVariable Long id, 
-            @RequestParam String reason,
-            Principal principal) {
-    	ticketClient.rejectTicket(id, principal.getName(), reason);
-    	return ResponseEntity.ok(Map.of("message", "Ticket rejected."));
+    public ResponseEntity<?> rejectTicket(
+        @PathVariable Long id,
+        @RequestParam String reason,
+        Principal principal
+    ) {
+        ticketClient.rejectTicket(id, principal.getName(), reason);
+        return ResponseEntity.ok(Map.of("message", "Ticket rejected."));
     }
 }
