@@ -31,4 +31,22 @@ public class NotificationClient {
 		        System.out.println("Failed to send email notification: " + e.getMessage());
 		    }
 		}
+	 
+	    public void sendResolvedTicketWithPdf(String to, String subject, String body, String attachmentPath) {
+	        try {
+	            EmailMessage email = new EmailMessage();
+	            email.setTo(to);
+	            email.setSubject(subject);
+	            email.setBody(body);
+	            email.setAttachmentPath(attachmentPath);
+
+	            ObjectMapper objectMapper = new ObjectMapper();
+	            String json = objectMapper.writeValueAsString(email);
+
+	            jmsTemplate.convertAndSend("ticket.email.queue", json);
+	            System.out.println("Sent resolved ticket email with PDF to: " + to);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 }

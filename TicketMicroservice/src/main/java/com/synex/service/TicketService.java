@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +113,6 @@ public class TicketService {
         return updated;
     }
 
-    
     public Ticket resolveTicket(Long ticketId, String comment) {
         Ticket ticket = ticketRepo.findById(ticketId)
             .orElseThrow(() -> new RuntimeException("Ticket not found"));
@@ -123,12 +124,14 @@ public class TicketService {
         ticket.setStatus("RESOLVED");
         ticket.setAssignedTo(ticket.getCreatedBy());
         Ticket updated = ticketRepo.save(ticket);
-        
+
         String fullComment = "Resolved by Admin - Resolution comments: " + comment;
         logHistory(updated, "RESOLVED", fullComment, "admin@gmail.com");
+
         return updated;
     }
 
+    
     
     public Ticket reopenTicket(Long ticketId) {
         Ticket ticket = ticketRepo.findById(ticketId)
@@ -194,4 +197,12 @@ public class TicketService {
     public List<TicketHistory> getHistoryByTicketId(Long ticketId) {
         return historyRepo.findByTicketId(ticketId);
     }
+    public List<Ticket> getTicketsAssignedToWithStatus(String email, String status) {
+        return ticketRepo.findByAssignedToAndStatus(email, status);
+    }
+    
+    public List<Ticket> getTicketsAssignedTo(String email) {
+        return ticketRepo.findByAssignedTo(email);
+    }
+
 }

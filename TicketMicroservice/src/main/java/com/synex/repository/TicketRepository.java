@@ -9,5 +9,6 @@ import com.synex.domain.Ticket;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 	List<Ticket> findByCreatedBy(String createdBy);
 	List<Ticket> findByAssignedToAndStatus(String assignedTo, String status);
+	List<Ticket> findByAssignedTo(String email);
 
 }

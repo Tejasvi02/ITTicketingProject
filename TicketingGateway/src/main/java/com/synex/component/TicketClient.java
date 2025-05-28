@@ -6,9 +6,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.swing.text.Document;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +26,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synex.model.EmailMessage;
 import com.synex.model.TicketForm;
 import com.synex.model.TicketHistoryDTO;
 import com.synex.service.EmployeeRoleService;
@@ -177,27 +182,11 @@ public class TicketClient {
     	RestTemplate restTemplate = new RestTemplate();
         return restTemplate.getForObject(ticketsToApproveUrl + managerEmail, List.class);
     }
-
     
-//    public void approveTicket(Long ticketId) {
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        // Hard‑coded admin email
-//        String adminEmail = "admin@gmail.com";
-//
-//        // Send raw email without encoding
-//        String url = baseTicketUrl 
-//                   + ticketId 
-//                   + "/approve?adminEmail=" 
-//                   + adminEmail;
-//
-//        restTemplate.postForEntity(url, null, Void.class);
-//    }
-    
-    public void approveTicket(Long ticketId, String adminEmail) {
+    public void approveTicket(Long ticketId, String adminEmailForAssignment, String adminEmailForNotification) {
         RestTemplate restTemplate = new RestTemplate();
 
-        String url = baseTicketUrl + ticketId + "/approve?adminEmail=" + adminEmail;
+        String url = baseTicketUrl + ticketId + "/approve?adminEmail=" + adminEmailForAssignment;
 
         ResponseEntity<Map> response = restTemplate.postForEntity(url, null, Map.class);
 
@@ -212,21 +201,19 @@ public class TicketClient {
             String subjectToUser = "Your Ticket has been Approved";
             String bodyToUser = "Your ticket (ID " + id + ") has been approved by your manager and assigned to the admin.";
 
-            // ✅ Send correctly: to, subject, body
-            notificationClient.sendTicketCreationEmail(adminEmail, subjectToAdmin, bodyToAdmin);
+            notificationClient.sendTicketCreationEmail(adminEmailForNotification, subjectToAdmin, bodyToAdmin);
             notificationClient.sendTicketCreationEmail(createdBy, subjectToUser, bodyToUser);
         } else {
             throw new RuntimeException("Ticket approval failed");
         }
     }
-
     
-//    public void rejectTicket(Long ticketId, String managerEmail, String reason) {
-//        RestTemplate restTemplate = new RestTemplate();
-//        String url = baseTicketUrl + ticketId + "/reject?managerEmail=" + managerEmail + "&reason=" + URLEncoder.encode(reason, StandardCharsets.UTF_8);
-//        restTemplate.postForEntity(url, null, Void.class);
-//    }
-//    
+    public List<Map<String, Object>> getAssignedTickets(String email, String status) {
+        String url = baseTicketUrl + "assigned?email=" + email + "&status=" + status;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+        return response.getBody();
+    }
     
     public void rejectTicket(Long ticketId, String managerEmail, String reason) {
         RestTemplate restTemplate = new RestTemplate();
@@ -254,14 +241,60 @@ public class TicketClient {
     }
 
 
-    public void resolveTicket(Long ticketId, String comment) {
-        String url = baseTicketUrl + ticketId + "/resolve";
+//    public void resolveTicket(Long ticketId, String comment) {
+//        String url = baseTicketUrl + ticketId + "/resolve";
+//        RestTemplate restTemplate = new RestTemplate();
+//        Map<String, String> payload = Map.of("comment", comment);
+//        restTemplate.postForEntity(url, payload, Void.class);
+//    }
+
+//    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
+//        String url = baseTicketUrl + ticketId + "/resolve";
+//        RestTemplate restTemplate = new RestTemplate();
+//        Map<String, String> payload = Map.of("comment", comment);
+//
+//        ResponseEntity<Map> response = restTemplate.postForEntity(url, payload, Map.class);
+//        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+//            return response.getBody();
+//        } else {
+//            throw new RuntimeException("Failed to resolve ticket.");
+//        }
+//    }
+
+//    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
+//        String url = baseTicketUrl + ticketId + "/resolve";
+//        Map<String, String> body = new HashMap<>();
+//        body.put("comment", comment);
+//        HttpEntity<Map<String, String>> request = new HttpEntity<>(body);
+//        RestTemplate restTemplate = new RestTemplate();
+//        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.PUT, request, Map.class);
+//        return response.getBody();
+//    }
+    
+//    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
+//        String url = baseTicketUrl + ticketId + "/resolve";
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        HttpEntity<String> entity = new HttpEntity<>(comment, headers);
+//        RestTemplate restTemplate = new RestTemplate();
+//        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+//        return response.getBody();
+//    }
+    
+    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
+        String url = baseTicketUrl + ticketId + "/resolve"; // Ticket Microservice URL
+        Map<String, String> body = new HashMap<>();
+        body.put("comment", comment);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
         RestTemplate restTemplate = new RestTemplate();
-        Map<String, String> payload = Map.of("comment", comment);
-        restTemplate.postForEntity(url, payload, Void.class);
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+        return response.getBody();
     }
 
-    
+
 
     public void reopenTicket(Long ticketId) {
     String url = baseTicketUrl + ticketId + "/reopen";

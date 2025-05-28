@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.synex.component.NotificationClient;
 import com.synex.component.TicketClient;
 import com.synex.domain.Employee;
 import com.synex.service.EmployeeRoleService;
+import com.synex.service.PdfService;
 
 import java.security.Principal;
 import java.util.List;
@@ -31,6 +33,12 @@ public class AdminController {
     
     @Autowired
     private EmployeeRoleService employeeRoleService;
+    
+    @Autowired
+    private PdfService pdfService;
+    
+    @Autowired
+    private NotificationClient notificationClient;
 
     // Load JSP page
     @GetMapping("/admin/tickets")
@@ -47,12 +55,34 @@ public class AdminController {
         return tickets;
     }
     
+//    @PostMapping("/admin/api/ticket/{id}/resolve")
+//    @ResponseBody
+//    public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
+//        String comment = body.get("comment");
+//        ticketClient.resolveTicket(id, comment);
+//        return ResponseEntity.ok(Map.of("message", "Ticket resolved."));
+//    }
+
     @PostMapping("/admin/api/ticket/{id}/resolve")
     @ResponseBody
     public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String comment = body.get("comment");
-        ticketClient.resolveTicket(id, comment);
-        return ResponseEntity.ok(Map.of("message", "Ticket resolved."));
+
+        // Call Ticket microservice to resolve the ticket and get the updated data
+        Map<String, Object> ticket = ticketClient.resolveTicket(id, comment);
+
+        // Generate PDF and get the file path
+        String filePath = pdfService.createResolutionPdf(ticket);
+
+        // Send email with attachment using JMS (centralized via NotificationClient)
+        notificationClient.sendResolvedTicketWithPdf(
+            ticket.get("createdBy").toString(),
+            "Your Ticket #" + ticket.get("id") + " has been Resolved",
+            "Dear user,\n\nYour ticket has been resolved. Please find the resolution PDF attached.\n\nRegards,\nSupport Team",
+            filePath
+        );
+
+        return ResponseEntity.ok(Map.of("message", "Ticket resolved and email sent."));
     }
 
     
@@ -66,14 +96,12 @@ public class AdminController {
     @GetMapping("/admin/api/assigned-tickets")
     @ResponseBody
     public List<Map<String, Object>> getAssignedTickets(Principal principal) {
-        String adminEmail = principal.getName(); // ✅ email injected from session
-
-        // Filter tickets assigned to this admin
-        return ticketClient.getAllTickets().stream()
-            .filter(ticket -> adminEmail.equals(ticket.get("assignedTo")))
-            .collect(Collectors.toList());
+        String adminEmail = principal.getName();
+        List<Map<String, Object>> tickets = ticketClient.getAssignedTickets(adminEmail, "APPROVED");
+        System.out.println("Assigned tickets for " + adminEmail + ": " + tickets);
+        return tickets;
     }
-    
+
 
     // Admin page to view users
     @GetMapping("/admin/users")

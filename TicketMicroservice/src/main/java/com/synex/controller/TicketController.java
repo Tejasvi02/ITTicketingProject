@@ -2,6 +2,7 @@ package com.synex.controller;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,19 +37,17 @@ public class TicketController {
     public Ticket createTicket(@RequestBody Ticket ticket) {
         return ticketService.createTicket(ticket);
     }
-    //without file upload
-//    @PostMapping("/tickets")
-//    public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
-//        Ticket createdTicket = ticketService.createTicket(ticket);
-//        return new ResponseEntity<>(createdTicket, HttpStatus.CREATED);
-//    }
+//    
     
-//    @PostMapping("/ticket/{id}/request-approval")
-//    public ResponseEntity<?> requestApproval(@PathVariable Long id, @RequestParam String managerEmail) {
-//        ticketService.sendForApproval(id, managerEmail);
-//        return ResponseEntity.ok().build();
-//    }
+    @GetMapping("/ticket/assigned")
+    public ResponseEntity<List<Ticket>> getTicketsAssignedToAdmin() {
+        String adminEmail = "tejasvijava555@gmail.com"; // Your hardcoded admin email
 
+        List<Ticket> tickets = ticketService.getTicketsAssignedTo(adminEmail);
+
+        return ResponseEntity.ok(tickets);
+    }
+    
     @PostMapping("/ticket/{id}/request-approval")
     public ResponseEntity<?> requestApproval(
             @PathVariable Long id,
@@ -61,12 +60,6 @@ public class TicketController {
         if (decoded.startsWith("\"") && decoded.endsWith("\"")) {
             decoded = decoded.substring(1, decoded.length() - 1);
         }
-
-        // 3) Log what we’re about to save
-        System.out.println(">>> requestApproval raw managerEmail: `" + managerEmail + "`");
-        System.out.println(">>> requestApproval cleaned decoded: `" + decoded + "`");
-        System.out.println(">>> Length: " + decoded.length());
-
         ticketService.sendForApproval(id, decoded);
         return ResponseEntity.ok().build();
     }
@@ -94,14 +87,33 @@ public class TicketController {
     public List<Ticket> getAllTickets() {
         return ticketService.getAllTickets();
     }
-
+//
+//    @PostMapping("/ticket/{id}/resolve")
+//    public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
+//        String comment = body.get("comment");
+//        ticketService.resolveTicket(id, comment);
+//        return ResponseEntity.ok(Map.of("message", "Ticket resolved successfully."));
+//    }
+//
+//    
+    
     @PostMapping("/ticket/{id}/resolve")
     public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String comment = body.get("comment");
-        ticketService.resolveTicket(id, comment);
-        return ResponseEntity.ok(Map.of("message", "Ticket resolved successfully."));
+        Ticket ticket = ticketService.resolveTicket(id, comment);
+        return ResponseEntity.ok(convertTicketToMap(ticket));
     }
 
+    private Map<String, Object> convertTicketToMap(Ticket ticket) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", ticket.getId());
+        map.put("title", ticket.getTitle());
+        map.put("description", ticket.getDescription());
+        map.put("status", ticket.getStatus());
+        map.put("createdBy", ticket.getCreatedBy());
+        return map;
+    }
+    
     
   //Testing for gateway and microservice connection
   	@RequestMapping(value = "/testGet/{data}",method = RequestMethod.GET)
@@ -120,16 +132,7 @@ public class TicketController {
   	public ResponseEntity<List<Ticket>> getTicketsToApprove(@RequestParam String managerEmail) {
   	    return ResponseEntity.ok(ticketService.getTicketsAssignedToManager(managerEmail));
   	}
-
-//    @PostMapping("/ticket/{id}/approve")
-//    public ResponseEntity<?> approveTicket(
-//        @PathVariable Long id,
-//        @RequestParam String adminEmail    // injected by Gateway
-//    ) {
-//        ticketService.approveTicket(id, adminEmail);
-//        return ResponseEntity.ok(Map.of("message","Ticket approved."));
-//    }
-//    
+  
   	@PostMapping("/ticket/{id}/approve")
   	public ResponseEntity<Ticket> approveTicket(
   	    @PathVariable Long id,
@@ -170,6 +173,7 @@ public class TicketController {
         history.sort((h1, h2) -> h2.getActionDate().compareTo(h1.getActionDate()));
         return ResponseEntity.ok(history);
     }
+
 
 
 }

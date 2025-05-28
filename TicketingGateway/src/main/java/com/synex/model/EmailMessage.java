@@ -7,6 +7,7 @@ public class EmailMessage implements Serializable {
     private String to;
     private String subject;
     private String body;
+    private String attachmentPath;
 
     public EmailMessage() {}
 
@@ -25,4 +26,18 @@ public class EmailMessage implements Serializable {
 
     public String getBody() { return body; }
     public void setBody(String body) { this.body = body; }
+
+	public String getAttachmentPath() {
+		return attachmentPath;
+	}
+
+	public void setAttachmentPath(String attachmentPath) {
+		this.attachmentPath = attachmentPath;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+    
+    
 }

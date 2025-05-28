@@ -4,8 +4,17 @@ public class EmailMessage {
     private String to;
     private String subject;
     private String body;
+    private String attachmentPath;
 
-    public EmailMessage() {}
+    public String getAttachmentPath() {
+		return attachmentPath;
+	}
+
+	public void setAttachmentPath(String attachmentPath) {
+		this.attachmentPath = attachmentPath;
+	}
+
+	public EmailMessage() {}
 
     public EmailMessage(String to, String subject, String body) {
         this.to = to;
