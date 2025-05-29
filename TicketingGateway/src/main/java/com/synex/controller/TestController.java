@@ -33,13 +33,4 @@ public class TestController {
 		
 	}
 	
-    @Autowired
-    private TicketScheduler ticketScheduler;
-
-    @GetMapping("/test/run-auto-close")
-    public ResponseEntity<String> runAutoClose() {
-        ticketScheduler.autoCloseOldResolvedTickets();
-        return ResponseEntity.ok("Auto-close job run triggered.");
-    }
-	
 }
