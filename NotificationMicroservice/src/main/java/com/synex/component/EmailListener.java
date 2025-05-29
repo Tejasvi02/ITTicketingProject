@@ -12,18 +12,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synex.pojo.EmailMessage;
 import com.synex.service.EmailService;
 
+
 @Component
 public class EmailListener {
 
     @Autowired
     private EmailService emailService;
-    
+
     @JmsListener(destination = "ticket.email.queue")
     public void handleEmail(String messageJson) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(messageJson);
-            String type = root.get("type").asText();
+
+            JsonNode typeNode = root.get("type");
+            if (typeNode == null) {
+                System.err.println("Received message without 'type' field: " + messageJson);
+                return; // skip or handle gracefully
+            }
+            String type = typeNode.asText();
 
             switch (type) {
                 case "plain":
@@ -45,4 +52,3 @@ public class EmailListener {
         }
     }
 }
-

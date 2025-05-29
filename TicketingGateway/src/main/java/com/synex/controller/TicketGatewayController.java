@@ -43,36 +43,6 @@ public class TicketGatewayController {
         model.addAttribute("ticketForm", new TicketForm());
         return "ticketForm";
     }
-    
-
-//    @PostMapping("/submitTicket")
-//    public String submitTicket(@ModelAttribute TicketForm form,
-//                               @RequestParam("files") MultipartFile[] files,
-//                               RedirectAttributes redirectAttributes) {
-//        try {
-//            // Get logged-in user's email
-//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//            String currentUserEmail = authentication.getName();
-//
-//            // Set metadata
-//            form.setCreatedBy(currentUserEmail);
-//            form.setAssignedTo(currentUserEmail);
-//
-//            List<MultipartFile> fileList = Arrays.asList(files);
-//            ResponseEntity<String> response = ticketClient.createTicketWithFiles(form, fileList);
-//
-//            // OPTIONAL: Deserialize and do something with response
-//            // ObjectMapper mapper = new ObjectMapper();
-//            // Ticket createdTicket = mapper.readValue(response.getBody(), Ticket.class);
-//
-//            // Add flash attribute to show success alert
-//            redirectAttributes.addFlashAttribute("ticketCreated", true);
-//            return "redirect:/user/tickets";
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("error", "Error submitting ticket: " + e.getMessage());
-//            return "redirect:/user/ticket/form";
-//        }
-//    }
 
     @PostMapping("/submitTicket")
     public String submitTicket(@ModelAttribute TicketForm form,

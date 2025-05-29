@@ -68,7 +68,7 @@ public class TicketService {
         ticket.setAssignedTo(managerEmail);
         Ticket updated = ticketRepo.save(ticket);
 
-        logHistory(updated, "SENT_FOR_APPROVAL", "Ticket sent for approval to manager: " + managerEmail,ticket.getCreatedBy());
+        logHistory(updated, "SENT_FOR_APPROVAL", "Ticket sent for approval to manager: " + managerEmail,ticket.getCreatedBy(), LocalDateTime.now());
     }
     
     public List<Ticket> getTicketsAssignedToManager(String managerEmail) {
@@ -87,7 +87,7 @@ public class TicketService {
         ticket.setAssignedTo(adminEmail);
         Ticket updated = ticketRepo.save(ticket);
 
-        logHistory(updated, "APPROVED", "Ticket approved and assigned to admin: " + adminEmail,manageremail);
+        logHistory(updated, "APPROVED", "Ticket approved and assigned to admin: " + adminEmail,manageremail, LocalDateTime.now());
         return updated;
     }
 
@@ -108,7 +108,7 @@ public class TicketService {
         String fullComment = "Ticket rejected by manager: " + managerEmail + 
                              (reason != null && !reason.isBlank() ? " - Reason: " + reason : "");
 
-        logHistory(updated, "REJECTED", fullComment, managerEmail);
+        logHistory(updated, "REJECTED", fullComment, managerEmail, LocalDateTime.now());
 
         return updated;
     }
@@ -126,7 +126,7 @@ public class TicketService {
         Ticket updated = ticketRepo.save(ticket);
 
         String fullComment = "Resolved by Admin - Resolution comments: " + comment;
-        logHistory(updated, "RESOLVED", fullComment, "admin@gmail.com");
+        logHistory(updated, "RESOLVED", fullComment, "admin@gmail.com", LocalDateTime.now());
 
         return updated;
     }
@@ -142,7 +142,7 @@ public class TicketService {
         ticket.setStatus("REOPENED");
         Ticket updated = ticketRepo.save(ticket);
 
-        logHistory(updated, "REOPENED", "Ticket reopened by user",ticket.getCreatedBy());
+        logHistory(updated, "REOPENED", "Ticket reopened by user",ticket.getCreatedBy(), LocalDateTime.now());
         return updated;
     }
 
@@ -155,7 +155,7 @@ public class TicketService {
         ticket.setStatus("CLOSED");
         Ticket updated = ticketRepo.save(ticket);
 
-        logHistory(updated, "CLOSED", "Ticket closed by user",ticket.getCreatedBy());
+        logHistory(updated, "CLOSED", "Ticket closed by user",ticket.getCreatedBy(), LocalDateTime.now());
         return updated;
     }
 
@@ -179,17 +179,17 @@ public class TicketService {
         existing.setFileAttachmentPaths(updatedData.getFileAttachmentPaths());
 
         Ticket updated = ticketRepo.save(existing);
-        logHistory(updated, "UPDATED", "Ticket fields updated",updated.getCreatedBy());
+        logHistory(updated, "UPDATED", "Ticket fields updated",updated.getCreatedBy(), LocalDateTime.now());
         return updated;
     }
     
     //ticket history
-    private void logHistory(Ticket ticket, String action, String comments, String actionBy) {
+    private void logHistory(Ticket ticket, String action, String comments, String actionBy, LocalDateTime actionDate) {
         TicketHistory history = new TicketHistory();
         history.setTicket(ticket);
         history.setAction(action);
         history.setComments(comments);
-        history.setActionDate(LocalDateTime.now());
+        history.setActionDate(actionDate);
         history.setActionBy(actionBy);
         historyRepo.save(history);
     }
@@ -204,5 +204,19 @@ public class TicketService {
     public List<Ticket> getTicketsAssignedTo(String email) {
         return ticketRepo.findByAssignedTo(email);
     }
+    
+    public Ticket autoCloseTicket(Ticket ticket) {
+        if (!"RESOLVED".equals(ticket.getStatus())) {
+            throw new IllegalStateException("Only resolved tickets can be auto-closed.");
+        }
+
+        ticket.setStatus("CLOSED");
+        Ticket updated = ticketRepo.save(ticket);
+        System.out.println("Updated ticket ID " + updated.getId() + " to status: " + updated.getStatus());
+
+        logHistory(updated, "CLOSED", "Ticket auto-closed after 5 days of inactivity", "system@autoclose", LocalDateTime.now());
+        return updated;
+    }
+
 
 }

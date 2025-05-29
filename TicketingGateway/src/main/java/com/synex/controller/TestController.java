@@ -1,6 +1,8 @@
 package com.synex.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.synex.component.TicketClient;
+import com.synex.service.TicketScheduler;
 
 @RestController
 public class TestController {
@@ -29,5 +32,14 @@ public class TestController {
 		return ticketClient.testPostClient(node);
 		
 	}
+	
+    @Autowired
+    private TicketScheduler ticketScheduler;
+
+    @GetMapping("/test/run-auto-close")
+    public ResponseEntity<String> runAutoClose() {
+        ticketScheduler.autoCloseOldResolvedTickets();
+        return ResponseEntity.ok("Auto-close job run triggered.");
+    }
 	
 }
