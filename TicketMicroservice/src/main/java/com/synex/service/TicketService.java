@@ -211,19 +211,6 @@ public class TicketService {
         return ticketRepo.findByAssignedTo(email);
     }
     
-//    public Ticket autoCloseTicket(Ticket ticket) {
-//        if (!"RESOLVED".equals(ticket.getStatus())) {
-//            throw new IllegalStateException("Only resolved tickets can be auto-closed.");
-//        }
-//
-//        ticket.setStatus("CLOSED");
-//        Ticket updated = ticketRepo.save(ticket);
-//        System.out.println("Updated ticket ID " + updated.getId() + " to status: " + updated.getStatus());
-//
-//        logHistory(updated, "CLOSED", "Ticket auto-closed after 5 days of inactivity", "system@autoclose", LocalDateTime.now());
-//        return updated;
-//    }
-    
     public Ticket autoCloseTicket(Ticket ticket) {
         if (!"RESOLVED".equals(ticket.getStatus())) {
             System.out.println("Ticket not in RESOLVED state: " + ticket.getId());
