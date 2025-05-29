@@ -1,5 +1,7 @@
 package com.synex.controller;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,18 +59,20 @@ public class UserController {
 	    try {
 	        String userEmail = principal.getName();
 
-	        // Step 1: Assign ticket to manager via ticketClient
+	        // Assign ticket to manager via ticketClient
 	        ticketClient.sendForApproval(id, userEmail);
 
-	        // Step 2: Get manager email
-	        String managerEmail = employeeRoleService.getManagerEmailForUser(userEmail);
+	        // Get manager email (possibly encoded)
+	        String encodedManagerEmail = employeeRoleService.getManagerEmailForUser(userEmail);
 
-	        // Step 3: Prepare and send email notification
+	        // Decode the email to convert %2B back to +
+	        String managerEmail = URLDecoder.decode(encodedManagerEmail.replace(" ", "+"), StandardCharsets.UTF_8.name());
+
+	        // Prepare and send email notification
 	        String subject = "Approval Request: Ticket #" + id;
 	        String body = "Dear Manager,\n\n"
 	                    + "User " + userEmail + " has requested your approval for Ticket #" + id + ".\n"
 	                    + "Please review and take action in the ticketing system.\n\n"
-	                    //+ "Link: http://localhost:8282/manager/tickets" + id + "\n\n" furture scope id and displaying that ticket
 	                    + "Link: http://localhost:8282/login \n\n"
 	                    + "Regards,\nTicketing System";
 

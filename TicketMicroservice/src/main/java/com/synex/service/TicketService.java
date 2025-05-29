@@ -3,6 +3,9 @@ package com.synex.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,16 +63,19 @@ public class TicketService {
         return tickets;
     }
     
-    public void sendForApproval(Long ticketId, String managerEmail) {
+    public void sendForApproval(Long ticketId, String managerEmail) throws UnsupportedEncodingException {
+        String decodedEmail = URLDecoder.decode(managerEmail.replace(" ", "+"), StandardCharsets.UTF_8.name());
+
         Ticket ticket = ticketRepo.findById(ticketId)
             .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
         ticket.setStatus("PENDING_APPROVAL");
-        ticket.setAssignedTo(managerEmail);
-        Ticket updated = ticketRepo.save(ticket);
+        ticket.setAssignedTo(decodedEmail); // Save decoded email here
+        ticketRepo.save(ticket);
 
-        logHistory(updated, "SENT_FOR_APPROVAL", "Ticket sent for approval to manager: " + managerEmail,ticket.getCreatedBy(), LocalDateTime.now());
+        logHistory(ticket, "PENDING_APPROVAL", "Ticket sent for approval to manager: " + decodedEmail, ticket.getCreatedBy(), LocalDateTime.now());
     }
+
     
     public List<Ticket> getTicketsAssignedToManager(String managerEmail) {
         return ticketRepo.findByAssignedToAndStatus(managerEmail, "PENDING_APPROVAL");
@@ -126,7 +132,7 @@ public class TicketService {
         Ticket updated = ticketRepo.save(ticket);
 
         String fullComment = "Resolved by Admin - Resolution comments: " + comment;
-        logHistory(updated, "RESOLVED", fullComment, "admin@gmail.com", LocalDateTime.now());
+        logHistory(updated, "RESOLVED", fullComment, "tejasvijava555@gmail.com", LocalDateTime.now());
 
         return updated;
     }

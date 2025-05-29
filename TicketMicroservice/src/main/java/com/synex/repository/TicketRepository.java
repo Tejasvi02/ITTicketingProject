@@ -23,5 +23,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 //		       "SELECT h FROM TicketHistory h WHERE h.ticket = t AND h.action = 'RESOLVED' AND TRUNC(h.actionDate) <= :threshold)")
 //		List<Ticket> findResolvedTicketsOlderThan(@Param("threshold") LocalDate threshold);
 
+	@Query("SELECT t FROM Ticket t WHERE t.status = 'PENDING_APPROVAL'")
+		List<Ticket> findPendingApprovalTickets();
 
 }

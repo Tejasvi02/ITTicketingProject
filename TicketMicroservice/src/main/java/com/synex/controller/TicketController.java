@@ -1,5 +1,6 @@
 package com.synex.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -50,19 +51,20 @@ public class TicketController {
     @PostMapping("/ticket/{id}/request-approval")
     public ResponseEntity<?> requestApproval(
             @PathVariable Long id,
-            @RequestParam String managerEmail) {
+            @RequestParam String managerEmail) throws UnsupportedEncodingException {
 
-        // 1) Decode URL‑encoded data
-        String decoded = URLDecoder.decode(managerEmail, StandardCharsets.UTF_8);
+        // Fix any spaces turned from '+'
+        String fixedEmail = managerEmail.replace(" ", "+");
 
-        // 2) Trim off any stray quotes at start/end
-        if (decoded.startsWith("\"") && decoded.endsWith("\"")) {
-            decoded = decoded.substring(1, decoded.length() - 1);
-        }
+        // Then decode normally
+        String decoded = URLDecoder.decode(fixedEmail, StandardCharsets.UTF_8);
+
+        // Now pass to your service
         ticketService.sendForApproval(id, decoded);
+
         return ResponseEntity.ok().build();
     }
-    
+
     @PostMapping("/ticket/{id}/reject")
     public ResponseEntity<Ticket> rejectTicket(
         @PathVariable Long id,
@@ -86,16 +88,8 @@ public class TicketController {
     public List<Ticket> getAllTickets() {
         return ticketService.getAllTickets();
     }
-//
-//    @PostMapping("/ticket/{id}/resolve")
-//    public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
-//        String comment = body.get("comment");
-//        ticketService.resolveTicket(id, comment);
-//        return ResponseEntity.ok(Map.of("message", "Ticket resolved successfully."));
-//    }
-//
-//    
-    
+
+ 
     @PostMapping("/ticket/{id}/resolve")
     public ResponseEntity<?> resolveTicket(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String comment = body.get("comment");
