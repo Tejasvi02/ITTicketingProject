@@ -36,6 +36,7 @@ public class TicketController {
     
     @PostMapping("/tickets")
     public Ticket createTicket(@RequestBody Ticket ticket) {
+    	System.out.println("Received paths: " + ticket.getFileAttachmentPaths());
         return ticketService.createTicket(ticket);
     }
     

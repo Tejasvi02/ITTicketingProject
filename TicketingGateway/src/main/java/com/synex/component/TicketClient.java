@@ -47,7 +47,7 @@ public class TicketClient {
     private static final String requestApprovalUrl = "http://localhost:8383/ticket/"; // append {id}/request-approval
     private static final String ticketsToApproveUrl = "http://localhost:8383/api/manager/tickets?managerEmail=";
     private static final String baseTicketUrl = "http://localhost:8383/ticket/"; 
-
+ 
     @Autowired
     private EmployeeRoleService employeeRoleService;
     
@@ -215,6 +215,7 @@ public class TicketClient {
         return response.getBody();
     }
     
+    
     public void rejectTicket(Long ticketId, String managerEmail, String reason) {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -240,46 +241,6 @@ public class TicketClient {
         }
     }
 
-
-//    public void resolveTicket(Long ticketId, String comment) {
-//        String url = baseTicketUrl + ticketId + "/resolve";
-//        RestTemplate restTemplate = new RestTemplate();
-//        Map<String, String> payload = Map.of("comment", comment);
-//        restTemplate.postForEntity(url, payload, Void.class);
-//    }
-
-//    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
-//        String url = baseTicketUrl + ticketId + "/resolve";
-//        RestTemplate restTemplate = new RestTemplate();
-//        Map<String, String> payload = Map.of("comment", comment);
-//
-//        ResponseEntity<Map> response = restTemplate.postForEntity(url, payload, Map.class);
-//        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-//            return response.getBody();
-//        } else {
-//            throw new RuntimeException("Failed to resolve ticket.");
-//        }
-//    }
-
-//    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
-//        String url = baseTicketUrl + ticketId + "/resolve";
-//        Map<String, String> body = new HashMap<>();
-//        body.put("comment", comment);
-//        HttpEntity<Map<String, String>> request = new HttpEntity<>(body);
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.PUT, request, Map.class);
-//        return response.getBody();
-//    }
-    
-//    public Map<String, Object> resolveTicket(Long ticketId, String comment) {
-//        String url = baseTicketUrl + ticketId + "/resolve";
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity<String> entity = new HttpEntity<>(comment, headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
-//        return response.getBody();
-//    }
     
     public Map<String, Object> resolveTicket(Long ticketId, String comment) {
         String url = baseTicketUrl + ticketId + "/resolve"; // Ticket Microservice URL

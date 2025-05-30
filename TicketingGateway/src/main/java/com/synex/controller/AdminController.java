@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +25,17 @@ import com.synex.domain.Employee;
 import com.synex.service.EmployeeRoleService;
 import com.synex.service.PdfService;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,14 +98,50 @@ public class AdminController {
     }
 
     // Serve only assigned tickets (for logged-in admin)
+//    @GetMapping("/admin/api/assigned-tickets")
+//    @ResponseBody
+//    public List<Map<String, Object>> getAssignedTickets(Principal principal) {
+//        String adminEmail = principal.getName();
+//        List<Map<String, Object>> tickets = ticketClient.getAssignedTickets(adminEmail, "APPROVED");
+//        System.out.println("Assigned tickets for " + adminEmail + ": " + tickets);
+//        return tickets;
+//    }
     @GetMapping("/admin/api/assigned-tickets")
     @ResponseBody
     public List<Map<String, Object>> getAssignedTickets(Principal principal) {
-        String adminEmail = principal.getName();
-        List<Map<String, Object>> tickets = ticketClient.getAssignedTickets(adminEmail, "APPROVED");
-        System.out.println("Assigned tickets for " + adminEmail + ": " + tickets);
-        return tickets;
+        String adminEmail = "tejasvijava555@gmail.com"; // or hardcoded for testing
+        List<Map<String, Object>> rawTickets = ticketClient.getAssignedTickets(adminEmail, "APPROVED");
+
+        List<Map<String, Object>> convertedTickets = new ArrayList<>();
+
+        for (Map<String, Object> ticket : rawTickets) {
+            Map<String, Object> newTicket = new HashMap<>(ticket);
+
+            List<String> rawPaths = (List<String>) ticket.get("fileAttachmentPaths");
+            List<String> downloadUrls = new ArrayList<>();
+
+            if (rawPaths != null) {
+                for (String fullPath : rawPaths) {
+                    if (fullPath != null && !fullPath.isEmpty()) {
+                        // Just extract the filename
+                        String filename = new File(fullPath).getName();
+                        System.out.println(filename);
+                        // Encode URL safely
+                        String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8);
+                        // Build download URL
+                        String downloadUrl = "/admin/api/download?path=" + encoded;
+                        downloadUrls.add(downloadUrl);
+                    }
+                }
+            }
+
+            newTicket.put("fileAttachmentPaths", downloadUrls); // replace raw paths with URLs
+            convertedTickets.add(newTicket);
+        }
+
+        return convertedTickets;
     }
+
 
 
     // Admin page to view users
@@ -128,5 +179,100 @@ public class AdminController {
 
         return "redirect:/admin/users";
     }
+    
+//    @GetMapping("/admin/api/download")
+//    public ResponseEntity<Resource> downloadFile(@RequestParam("path") String encodedPath, Principal principal) {
+//        try {
+//            String decodedPath = URLDecoder.decode(encodedPath, StandardCharsets.UTF_8);
+//
+//            // Base upload directory (absolute path, no trailing slash)
+//            Path uploadDir = Paths.get("C:/Synergistic/Spring_Ankit/uploads").toAbsolutePath().normalize();
+//
+//            // Normalize user-requested path and resolve it safely against base
+//            Path filePath = uploadDir.resolve(decodedPath).normalize();
+//
+//            // Prevent path traversal by ensuring file is within base directory
+//            if (!filePath.startsWith(uploadDir)) {
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//            }
+//
+//            File file = filePath.toFile();
+//            if (!file.exists() || !file.isFile()) {
+//                return ResponseEntity.notFound().build();
+//            }
+//
+//            Resource resource = new UrlResource(file.toURI());
+//            String contentDisposition = "attachment; filename=\"" + file.getName() + "\"";
+//
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+//                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+//                    .body(resource);
+//        } catch (Exception e) {
+//            // Optional: log the error for debugging
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//    }
+
+//    @GetMapping("/admin/api/download")
+//    public ResponseEntity<Resource> downloadFile(@RequestParam String path) throws IOException {
+//        String uploadDir = "C:/Synergistic/Spring_Ankit/uploads/"; // base directory
+//        Path filePath = Paths.get(uploadDir).resolve(path).normalize();
+//        System.out.println(filePath);
+//        
+//        if (!Files.exists(filePath)) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        Resource resource = new UrlResource(filePath.toUri());
+//
+//        return ResponseEntity.ok()
+//            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+//            .body(resource);
+//    }
+    @GetMapping("/admin/api/download")
+    public ResponseEntity<Resource> downloadFile(@RequestParam String path) {
+        try {
+            // 1) Base upload directory
+            Path uploadRoot = Paths.get("C:/Synergistic/Spring_Ankit/uploads")
+                                  .toAbsolutePath().normalize();
+
+            // 2) Resolve filename against it
+            Path filePath = uploadRoot.resolve(path).normalize();
+
+            // ==== DEBUG LOGS ====
+            System.out.println(">>> Requested download for: " + path);
+            System.out.println(">>> Resolved uploadRoot: "  + uploadRoot);
+            System.out.println(">>> Resolved filePath: "    + filePath);
+            System.out.println(">>> Exists? " + Files.exists(filePath));
+            System.out.println(">>> IsRegularFile? " + Files.isRegularFile(filePath));
+            System.out.println(">>> IsReadable? " + Files.isReadable(filePath));
+            // ====================
+
+            if (!filePath.startsWith(uploadRoot) 
+                || !Files.exists(filePath) 
+                || !Files.isRegularFile(filePath)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, 
+                        "attachment; filename=\"" + resource.getFilename() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
 }
 
