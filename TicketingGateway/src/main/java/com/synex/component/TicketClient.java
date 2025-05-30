@@ -85,6 +85,9 @@ public class TicketClient {
 	//Create ticket
 	public ResponseEntity<String> createTicketWithFiles(TicketForm form, List<MultipartFile> files) throws Exception {
 	    List<String> paths = new ArrayList<>();
+	    for(String path : paths) {
+	    	System.out.println(path);
+	    }
 
 	    System.out.println("Files received in Client: " + files.size()); // Debug
 	    for (MultipartFile file : files) {
