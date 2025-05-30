@@ -180,57 +180,6 @@ public class AdminController {
         return "redirect:/admin/users";
     }
     
-//    @GetMapping("/admin/api/download")
-//    public ResponseEntity<Resource> downloadFile(@RequestParam("path") String encodedPath, Principal principal) {
-//        try {
-//            String decodedPath = URLDecoder.decode(encodedPath, StandardCharsets.UTF_8);
-//
-//            // Base upload directory (absolute path, no trailing slash)
-//            Path uploadDir = Paths.get("C:/Synergistic/Spring_Ankit/uploads").toAbsolutePath().normalize();
-//
-//            // Normalize user-requested path and resolve it safely against base
-//            Path filePath = uploadDir.resolve(decodedPath).normalize();
-//
-//            // Prevent path traversal by ensuring file is within base directory
-//            if (!filePath.startsWith(uploadDir)) {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-//            }
-//
-//            File file = filePath.toFile();
-//            if (!file.exists() || !file.isFile()) {
-//                return ResponseEntity.notFound().build();
-//            }
-//
-//            Resource resource = new UrlResource(file.toURI());
-//            String contentDisposition = "attachment; filename=\"" + file.getName() + "\"";
-//
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-//                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                    .body(resource);
-//        } catch (Exception e) {
-//            // Optional: log the error for debugging
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
-
-//    @GetMapping("/admin/api/download")
-//    public ResponseEntity<Resource> downloadFile(@RequestParam String path) throws IOException {
-//        String uploadDir = "C:/Synergistic/Spring_Ankit/uploads/"; // base directory
-//        Path filePath = Paths.get(uploadDir).resolve(path).normalize();
-//        System.out.println(filePath);
-//        
-//        if (!Files.exists(filePath)) {
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        Resource resource = new UrlResource(filePath.toUri());
-//
-//        return ResponseEntity.ok()
-//            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-//            .body(resource);
-//    }
     @GetMapping("/admin/api/download")
     public ResponseEntity<Resource> downloadFile(@RequestParam String path) {
         try {
