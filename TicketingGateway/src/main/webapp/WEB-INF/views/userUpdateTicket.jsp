@@ -1,3 +1,4 @@
+This is my view/update ticket jsp, now I need to correct a small thing, send for approval button should appear after the update ticket button is clicked unless the ticket is in created state
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>

@@ -178,6 +178,7 @@ public class TicketService {
 
     public Ticket updateTicket(Long id, Ticket updatedData) {
         Ticket existing = ticketRepo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+        existing.setStatus("OPEN");
 
         existing.setDescription(updatedData.getDescription());
         existing.setPriority(updatedData.getPriority());
